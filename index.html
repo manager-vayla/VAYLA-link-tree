@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VAYLA | Official Links</title>
+  <meta name="description" content="Official links & community for VAYLA. Quests, Updates, and Support." />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-color: #0f1724;
+      --card-bg: #0b1220;
+      --text-color: #e6eef2;
+      --muted: #9fb3bd;
+      --accent-color: #19b1b1; /* VAYLA accent */
+      --hover-color: rgba(25,177,177,0.08);
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      background-color:var(--bg-color);
+      color:var(--text-color);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      padding:2rem 1rem;
+    }
+
+    .profile-container{
+      width:100%;
+      max-width:480px;
+      margin:0 auto 1.5rem;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      text-align:center;
+      animation:fadeIn 0.8s ease-in;
+    }
+
+    .profile-img{
+      width:100px;
+      height:100px;
+      border-radius:50%;
+      border:3px solid var(--accent-color);
+      object-fit:cover;
+      margin-bottom:0.75rem;
+      background-color:transparent;
+      display:block;
+      overflow:hidden;
+    }
+
+    h1{font-size:1.25rem;margin:0.25rem 0;font-weight:700}
+    p.subtitle{color:var(--muted);margin:0;font-size:0.95rem}
+
+    .links-container{
+      width:100%;
+      max-width:480px;
+      display:flex;
+      flex-direction:column;
+      gap:1rem;
+    }
+
+    .link-card{
+      background-color:var(--card-bg);
+      padding:1rem 1.5rem;
+      border-radius:50px;
+      text-decoration:none;
+      color:var(--text-color);
+      font-weight:600;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+      transition:transform 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
+      border:1px solid rgba(255,255,255,0.03);
+      overflow:hidden;
+      width:100%;
+      box-sizing:border-box;
+    }
+
+    .link-card:hover{
+      transform:translateY(-3px);
+      background-color:var(--hover-color);
+      border-color:var(--accent-color);
+    }
+
+    .link-card i{
+      position:absolute;
+      left:1.25rem;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:28px;
+      height:28px;
+      border-radius:6px;
+      color:#fff;
+      font-size:14px;
+    }
+
+    /* Brand color backgrounds for icons */
+    .link-card i.zealy{background:#00B5AD;color:#fff}
+    .link-card i.x{background:#1DA1F2;color:#fff}
+    .link-card i.telegram{background:#27A0E0;color:#fff}
+    .link-card i.discord{background:#5865F2;color:#fff}
+    .link-card i.whitepaper{background:#E53E3E;color:#fff}    
+
+    .link-text{display:flex;flex-direction:column;align-items:center;gap:2px}
+    .link-text .label{font-size:1rem}
+    .link-text .desc{font-size:0.85rem;color:var(--muted);font-weight:500}
+
+    footer{margin-top:2.25rem;font-size:0.85rem;color:var(--muted)}
+
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+    @media (max-width:520px){
+      .link-card{padding:0.9rem 1.25rem}
+      .profile-img{width:88px;height:88px}
+    }
+  </style>
+</head>
+<body>
+  <div class="profile-container">
+    <img src="logo.jpg" alt="VAYLA logo" class="profile-img">
+    <h1>VAYLA</h1>
+    <p class="subtitle">Official links & community</p>
+  </div>
+
+  <div class="links-container">
+    <a class="link-card" href="vayla_whitepaper.pdf" target="_blank" rel="noopener noreferrer">
+      <i class="fas fa-file-pdf whitepaper" aria-hidden="true"></i>
+      <span class="link-text">
+        <span class="label">Whitepaper</span>
+        <span class="desc">Download the VAYLA whitepaper (PDF)</span>
+      </span>
+    </a>
+
+    <a class="link-card" href="https://zealy.io/cw/vayla" target="_blank" rel="noopener noreferrer">
+      <i class="fas fa-award zealy" aria-hidden="true"></i>
+      <span class="link-text">
+        <span class="label">Zealy (Quests)</span>
+        <span class="desc">Earn rewards & complete quests</span>
+      </span>
+    </a>
+
+    <a class="link-card" href="https://x.com/vaylamanager" target="_blank" rel="noopener noreferrer">
+      <i class="fab fa-twitter x" aria-hidden="true"></i>
+      <span class="link-text">
+        <span class="label">X (Twitter)</span>
+        <span class="desc">Official updates</span>
+      </span>
+    </a>
+
+    <a class="link-card" href="https://t.me/Vayla_Vaylian" target="_blank" rel="noopener noreferrer">
+      <i class="fab fa-telegram-plane telegram" aria-hidden="true"></i>
+      <span class="link-text">
+        <span class="label">Telegram (Community)</span>
+        <span class="desc">Join the conversation</span>
+      </span>
+    </a>
+
+    <a class="link-card" href="https://discord.gg/sjtuz8x8" target="_blank" rel="noopener noreferrer">
+      <i class="fab fa-discord discord" aria-hidden="true"></i>
+      <span class="link-text">
+        <span class="label">Discord (Server)</span>
+        <span class="desc">Community & support</span>
+      </span>
+    </a>
+  </div>
+
+  <footer>&copy; 2026 VAYLA. All rights reserved.</footer>
+</body>
+</html>
