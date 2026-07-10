@@ -14,668 +14,774 @@
   <meta name="geo.region" content="Global" />
   <link rel="canonical" href="https://manager-vayla.github.io/VAYLA-link-tree/" />
 
-  <!-- Fonts: Sora + JetBrains Mono — no Inter -->
+  <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect"/>
   <link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/>
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
+  <!-- GSAP for premium animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
   <style>
-    /* ─── Reset & Base ─── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      /* Canvas — deep navy, NOT pure black */
-      --bg:            #0d1525;
-      --bg-elevated:   #111b30;
-      --bg-card:       #15213a;
-      --bg-card-hover: #1a2847;
+      /* Deep navy base — NOT pure black */
+      --bg:         #09112a;
 
-      /* Borders */
-      --border:        rgba(82, 119, 190, 0.18);
-      --border-hover:  rgba(82, 119, 190, 0.55);
+      /* Cards are distinctly lighter than bg */
+      --card:       #132044;
+      --card-hover: #1b2e5e;   /* LIGHTER on hover, not darker */
+      --card-active:#243669;
 
-      /* Text */
-      --text-primary:  #dae4ff;
-      --text-secondary:#8fa3cc;
-      --text-muted:    #4d6080;
+      /* Borders — visible but subtle */
+      --border:        rgba(100, 149, 237, 0.20);
+      --border-hover:  rgba(100, 149, 237, 0.55);
+      --border-accent: rgba(59, 130, 246, 0.70);
 
-      /* Single accent — calibrated blue, NOT neon */
-      --accent:        #3b7cf8;
-      --accent-dim:    rgba(59, 124, 248, 0.12);
-      --accent-glow:   rgba(59, 124, 248, 0.22);
+      /* Text — high contrast */
+      --t1: #eef3ff;   /* primary — nearly white */
+      --t2: #a8bde8;   /* secondary */
+      --t3: #5c7ab8;   /* muted */
 
-      /* Tinted shadow */
-      --shadow-card:   0 2px 20px rgba(10, 20, 50, 0.5);
-      --shadow-hover:  0 8px 32px rgba(10, 20, 50, 0.7), 0 0 0 1px rgba(59, 124, 248, 0.3);
+      /* Single accent — calibrated blue */
+      --acc:      #4d8df7;
+      --acc-dim:  rgba(77,141,247,0.12);
+      --acc-glow: rgba(77,141,247,0.30);
 
-      /* Typography */
-      --font-sans: 'Sora', system-ui, sans-serif;
-      --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+      /* Colored tinted shadows */
+      --sh-card:  0 2px 16px rgba(9,17,42,0.7);
+      --sh-hover: 0 12px 40px rgba(9,17,42,0.8), 0 0 0 1px var(--border-accent), 0 0 24px var(--acc-glow);
+
+      --font: 'Sora', system-ui, sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+
+      --radius: 16px;
     }
 
     html { scroll-behavior: smooth; }
-
     body {
-      font-family: var(--font-sans);
-      background-color: var(--bg);
-      color: var(--text-primary);
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--t1);
       min-height: 100dvh;
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ─── Dynamic Background ─── */
-    .bg-canvas {
+    /* ══════════════════════════════════════
+       ANIMATED CANVAS BACKGROUND
+    ══════════════════════════════════════ */
+    #canvas-bg {
       position: fixed;
       inset: 0;
       z-index: 0;
       pointer-events: none;
-      overflow: hidden;
     }
 
-    /* Animated mesh gradient blobs — GPU-accelerated, no opacity hack */
-    .blob {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(80px);
-      will-change: transform;
-    }
-    .blob-1 {
-      width: 600px; height: 600px;
-      top: -150px; left: -150px;
-      background: radial-gradient(circle, rgba(30,80,200,0.18) 0%, transparent 70%);
-      animation: float-1 18s ease-in-out infinite;
-    }
-    .blob-2 {
-      width: 500px; height: 500px;
-      bottom: -100px; right: -100px;
-      background: radial-gradient(circle, rgba(20,60,180,0.14) 0%, transparent 70%);
-      animation: float-2 22s ease-in-out infinite;
-    }
-    .blob-3 {
-      width: 350px; height: 350px;
-      top: 40%; left: 50%;
-      background: radial-gradient(circle, rgba(59,124,248,0.08) 0%, transparent 70%);
-      animation: float-3 26s ease-in-out infinite;
-    }
-
-    /* Subtle grain texture overlay */
+    /* Grain overlay — breaks digital flatness */
     .grain {
       position: fixed;
       inset: 0;
       z-index: 1;
       pointer-events: none;
-      opacity: 0.035;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-      background-size: 180px 180px;
+      opacity: 0.04;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 160px;
     }
 
-    /* Scroll progress bar — right edge */
+    /* Scroll progress — right edge */
     #progress-bar {
-      position: fixed;
-      top: 0; right: 0;
-      width: 3px;
-      height: 100%;
-      z-index: 100;
-      background: var(--border);
+      position: fixed; top: 0; right: 0;
+      width: 3px; height: 100%; z-index: 200;
+      background: rgba(77,141,247,0.12);
     }
     #progress-fill {
-      width: 100%;
-      height: 0%;
-      background: linear-gradient(to bottom, var(--accent), rgba(59,124,248,0.3));
-      transition: height 0.05s linear;
-      border-radius: 0 0 2px 2px;
+      width: 100%; height: 0%;
+      background: linear-gradient(to bottom, #4d8df7, rgba(77,141,247,0.3));
     }
 
-    /* ─── Main Layout ─── */
-    .page-wrap {
+    /* ══════════════════════════════════════
+       LAYOUT
+    ══════════════════════════════════════ */
+    .page {
       position: relative;
       z-index: 2;
-      width: 100%;
       max-width: 860px;
       margin: 0 auto;
-      padding: 3.5rem 1.5rem 4rem;
+      padding: 3.5rem 1.5rem 4.5rem;
     }
 
-    /* ─── Profile Header ─── */
+    /* ══════════════════════════════════════
+       PROFILE HEADER
+    ══════════════════════════════════════ */
     .profile {
       display: flex;
       align-items: flex-end;
       gap: 1.75rem;
-      margin-bottom: 3rem;
       padding-bottom: 2.5rem;
+      margin-bottom: 2.5rem;
       border-bottom: 1px solid var(--border);
     }
 
-    .avatar-wrap {
+    .avatar-ring {
       position: relative;
       flex-shrink: 0;
     }
-
+    .avatar-ring::before {
+      content: '';
+      position: absolute;
+      inset: -5px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(77,141,247,0.45);
+      animation: pulse-ring 3.5s ease-in-out infinite;
+    }
+    .avatar-ring::after {
+      content: '';
+      position: absolute;
+      inset: -12px;
+      border-radius: 50%;
+      border: 1px solid rgba(77,141,247,0.15);
+      animation: pulse-ring 3.5s ease-in-out infinite 1s;
+    }
     .avatar {
-      width: 84px;
-      height: 84px;
+      display: block;
+      width: 80px; height: 80px;
       border-radius: 50%;
       border: 2px solid var(--border-hover);
       object-fit: cover;
-      display: block;
-      box-shadow: 0 0 0 4px var(--accent-dim), var(--shadow-card);
+      box-shadow: 0 0 28px var(--acc-glow);
     }
 
-    /* Pulsing ring — perpetual micro-loop */
-    .avatar-wrap::after {
-      content: '';
-      position: absolute;
-      inset: -6px;
-      border-radius: 50%;
-      border: 1.5px solid rgba(59, 124, 248, 0.35);
-      animation: pulse-ring 3s ease-in-out infinite;
-    }
-
-    .profile-text { flex: 1; }
-
-    .profile-name {
-      font-size: clamp(1.8rem, 5vw, 2.8rem);
-      font-weight: 800;
-      letter-spacing: -0.035em;
-      line-height: 1;
-      color: var(--text-primary);
-      margin-bottom: 0.4rem;
-    }
-
+    .profile-info { flex: 1; }
     .profile-tag {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--accent);
-      font-weight: 500;
-    }
-
-    .profile-desc {
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      margin-top: 0.5rem;
-      line-height: 1.6;
-      max-width: 55ch;
-    }
-
-    /* Status badge */
-    .status-badge {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-family: var(--font-mono);
-      font-size: 0.68rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      padding: 0.35rem 0.75rem;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      background: var(--bg-elevated);
-      white-space: nowrap;
-      align-self: flex-start;
-    }
-    .status-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: #22c55e;
-      box-shadow: 0 0 6px rgba(34, 197, 94, 0.7);
-      animation: blink 2.5s ease-in-out infinite;
-    }
-
-    /* ─── Section Label ─── */
-    .section-label {
-      font-family: var(--font-mono);
+      font-family: var(--mono);
       font-size: 0.65rem;
       letter-spacing: 0.15em;
       text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 1rem;
+      color: var(--acc);
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+    }
+    .profile-name {
+      font-size: clamp(2rem, 6vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: var(--t1);
+    }
+    .profile-desc {
+      font-size: 0.875rem;
+      color: var(--t2);
+      margin-top: 0.5rem;
+      line-height: 1.65;
+      max-width: 52ch;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--t3);
+      padding: 0.3rem 0.7rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(19,32,68,0.8);
+      align-self: flex-start;
+      white-space: nowrap;
+    }
+    .dot-live {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 8px rgba(34,197,94,0.8);
+      animation: blink 2s ease-in-out infinite;
+    }
+
+    /* ══════════════════════════════════════
+       SECTION LABEL
+    ══════════════════════════════════════ */
+    .section-label {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--t3);
+      margin: 1.25rem 0 0.75rem;
       font-weight: 500;
     }
 
-    /* ─── Link Grid ─── */
-    .links-grid {
-      display: grid;
-      gap: 0.75rem;
-    }
+    /* ══════════════════════════════════════
+       CARDS
+    ══════════════════════════════════════ */
 
-    /* Hero card — 2-col asymmetric span */
-    .links-grid-top {
+    /* Asymmetric grid: hero(2col) + arena(1col) */
+    .grid-top {
       display: grid;
       grid-template-columns: 1fr;
       gap: 0.75rem;
     }
-
-    @media (min-width: 600px) {
-      .links-grid-top {
-        grid-template-columns: 1.7fr 1fr;
-      }
+    @media (min-width: 580px) {
+      .grid-top { grid-template-columns: 1.6fr 1fr; }
     }
 
-    /* Standard 2-col row */
-    .links-row-2 {
+    /* 2-col market row */
+    .grid-2 {
       display: grid;
       grid-template-columns: 1fr;
       gap: 0.75rem;
     }
-    @media (min-width: 600px) {
-      .links-row-2 {
-        grid-template-columns: 1fr 1fr;
-      }
+    @media (min-width: 580px) {
+      .grid-2 { grid-template-columns: 1fr 1fr; }
     }
 
     /* 3-col social row */
-    .links-row-3 {
+    .grid-3 {
       display: grid;
       grid-template-columns: 1fr;
       gap: 0.75rem;
     }
-    @media (min-width: 600px) {
-      .links-row-3 {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-    @media (min-width: 800px) {
-      .links-row-3 {
-        grid-template-columns: 1fr 1fr 1fr;
-      }
-    }
+    @media (min-width: 500px) { .grid-3 { grid-template-columns: 1fr 1fr; } }
+    @media (min-width: 780px) { .grid-3 { grid-template-columns: 1fr 1fr 1fr; } }
 
-    /* Divider */
     .divider {
       height: 1px;
-      background: linear-gradient(to right, transparent, var(--border) 30%, var(--border) 70%, transparent);
-      margin: 0.5rem 0;
+      margin: 0.75rem 0 0;
+      background: linear-gradient(to right, transparent, var(--border) 25%, var(--border) 75%, transparent);
     }
 
-    /* ─── Link Card ─── */
-    .link-card {
+    /* Base card */
+    .card {
       position: relative;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       gap: 1.5rem;
-      padding: 1.25rem 1.4rem;
-      background: var(--bg-card);
+      padding: 1.3rem 1.4rem;
+      background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 14px;
+      border-radius: var(--radius);
       text-decoration: none;
-      color: var(--text-primary);
+      color: var(--t1);
       overflow: hidden;
-      transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s cubic-bezier(0.25,0.8,0.25,1), box-shadow 0.25s ease;
+      cursor: pointer;
+      transform: translateY(0) scale(1);
+      box-shadow: var(--sh-card);
+      transition:
+        background 0.22s ease,
+        border-color 0.22s ease,
+        box-shadow 0.22s ease,
+        transform 0.22s cubic-bezier(0.25,0.8,0.25,1);
       will-change: transform;
-      /* Perpetual breathe */
-      animation: card-breathe 5s ease-in-out infinite;
-      animation-delay: var(--delay, 0s);
     }
 
-    /* Spotlight border effect — cursor tracking */
-    .link-card::before {
+    /* Spotlight border gradient — JS sets --mx/--my */
+    .card::before {
       content: '';
       position: absolute;
       inset: 0;
       border-radius: inherit;
-      background: radial-gradient(400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(59,124,248,0.10), transparent 60%);
+      background: radial-gradient(
+        360px circle at var(--mx, 50%) var(--my, 50%),
+        rgba(77,141,247,0.12) 0%,
+        transparent 65%
+      );
       opacity: 0;
       transition: opacity 0.3s;
       pointer-events: none;
-      z-index: 0;
     }
 
-    .link-card:hover::before { opacity: 1; }
-
-    .link-card:hover {
-      animation: none;
-      background: var(--bg-card-hover);
+    .card:hover {
+      background: var(--card-hover);   /* LIGHTER */
       border-color: var(--border-hover);
-      transform: translateY(-4px) scale(1.015);
-      box-shadow: var(--shadow-hover);
+      transform: translateY(-5px) scale(1.018);
+      box-shadow: var(--sh-hover);
+    }
+    .card:hover::before { opacity: 1; }
+    .card:active {
+      transform: translateY(-2px) scale(1.008);
+      background: var(--card-active);
     }
 
-    .link-card:active {
-      transform: translateY(-1px) scale(1.005);
+    /* Hero card with background image */
+    .card-hero {
+      min-height: 190px;
     }
-
-    .link-card.hero {
-      min-height: 180px;
-      background-image: url('https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=900&q=60&fit=crop');
-      background-size: cover;
-      background-position: center;
-    }
-    .link-card.hero::after {
-      content: '';
+    .card-hero-bg {
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(13,21,37,0.88) 40%, rgba(13,21,37,0.50));
       border-radius: inherit;
-      z-index: 0;
+      background-image: url('https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=900&q=65&fit=crop');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.22;
+      transition: opacity 0.3s;
     }
-    .link-card.hero > * { position: relative; z-index: 1; }
+    .card-hero:hover .card-hero-bg { opacity: 0.38; }
 
-    /* Card inner layout */
-    .card-top {
+    /* Row card (horizontal layout) */
+    .card-row {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0;
+    }
+    .card-row-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .card-row-icon {
+      width: 42px; height: 42px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      flex-shrink: 0;
+      background: rgba(255,255,255,0.06);
+      color: var(--t2);
+      transition: background 0.2s, color 0.2s;
+    }
+    .card:hover .card-row-icon {
+      background: var(--acc-dim);
+      color: var(--acc);
+    }
+
+    /* Card inner elements */
+    .card-top-row {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      gap: 0.75rem;
+      gap: 0.5rem;
     }
 
-    .card-chip {
-      font-family: var(--font-mono);
-      font-size: 0.6rem;
+    .chip {
+      font-family: var(--mono);
+      font-size: 0.58rem;
       letter-spacing: 0.13em;
       text-transform: uppercase;
       font-weight: 600;
-      color: var(--accent);
-      border: 1px solid rgba(59, 124, 248, 0.35);
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      background: rgba(59,124,248,0.07);
+      color: var(--acc);
+      border: 1px solid rgba(77,141,247,0.30);
+      padding: 0.18rem 0.45rem;
+      border-radius: 5px;
+      background: rgba(77,141,247,0.07);
+      white-space: nowrap;
     }
 
-    .card-icon {
-      font-size: 1.1rem;
-      color: var(--text-muted);
+    .card-icon-top {
+      font-size: 1rem;
+      color: var(--t3);
       transition: color 0.2s, transform 0.2s;
     }
-
-    .link-card:hover .card-icon {
-      color: var(--accent);
+    .card:hover .card-icon-top {
+      color: var(--acc);
       transform: translate(2px, -2px);
     }
 
-    .card-bottom {}
-
     .card-title {
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       font-weight: 700;
       letter-spacing: -0.02em;
-      color: var(--text-primary);
+      color: var(--t1);
       margin-bottom: 0.2rem;
       transition: color 0.2s;
     }
-    .link-card:hover .card-title { color: #fff; }
+    .card:hover .card-title { color: #fff; }
+
+    .card-title-lg {
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
 
     .card-sub {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      color: var(--text-secondary);
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--t2);
       letter-spacing: 0.02em;
     }
 
-    /* Hero card text is bigger */
-    .link-card.hero .card-title { font-size: 1.35rem; }
-
-    /* ─── Footer ─── */
+    /* ══════════════════════════════════════
+       FOOTER
+    ══════════════════════════════════════ */
     footer {
       margin-top: 3rem;
       padding-top: 1.5rem;
       border-top: 1px solid var(--border);
       display: flex;
       justify-content: center;
-      align-items: center;
-      gap: 1rem;
+    }
+    .footer-txt {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      color: var(--t3);
     }
 
-    .footer-text {
-      font-family: var(--font-mono);
-      font-size: 0.68rem;
-      letter-spacing: 0.08em;
-      color: var(--text-muted);
-      text-align: center;
-    }
-
-    /* ─── Staggered entry animation ─── */
-    .fade-up {
-      opacity: 0;
-      transform: translateY(18px);
-      animation: fade-up-in 0.55s cubic-bezier(0.25,0.8,0.25,1) forwards;
-    }
-
-    /* ─── Keyframes ─── */
-    @keyframes float-1 {
-      0%, 100% { transform: translate(0,0) scale(1); }
-      33%       { transform: translate(60px, 40px) scale(1.05); }
-      66%       { transform: translate(-40px, 70px) scale(0.95); }
-    }
-    @keyframes float-2 {
-      0%, 100% { transform: translate(0,0) scale(1); }
-      33%       { transform: translate(-50px, -30px) scale(1.07); }
-      66%       { transform: translate(40px, -60px) scale(0.93); }
-    }
-    @keyframes float-3 {
-      0%, 100% { transform: translate(-50%, -50%) scale(1); }
-      50%       { transform: translate(-50%, -50%) scale(1.3); }
-    }
+    /* ══════════════════════════════════════
+       KEYFRAMES
+    ══════════════════════════════════════ */
     @keyframes pulse-ring {
-      0%, 100% { transform: scale(1);   opacity: 0.5; }
-      50%       { transform: scale(1.08); opacity: 0.15; }
+      0%,100% { transform: scale(1);    opacity: 0.5; }
+      50%      { transform: scale(1.1); opacity: 0.1; }
     }
     @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.4; }
-    }
-    @keyframes card-breathe {
-      0%, 100% { border-color: rgba(82, 119, 190, 0.18); }
-      50%       { border-color: rgba(59, 124, 248, 0.32); }
-    }
-    @keyframes fade-up-in {
-      to { opacity: 1; transform: translateY(0); }
+      0%,100% { opacity: 1; }
+      50%      { opacity: 0.35; }
     }
 
-    /* ─── Responsive ─── */
-    @media (max-width: 599px) {
+    /* Initial hidden state for GSAP entry */
+    .gsap-hidden {
+      opacity: 0;
+      transform: translateY(22px);
+    }
+
+    @media (max-width: 579px) {
       .profile { flex-direction: column; align-items: flex-start; gap: 1rem; }
-      .page-wrap { padding: 2rem 1rem 3rem; }
+      .page { padding: 2rem 1rem 3rem; }
     }
   </style>
 </head>
 <body>
 
-<!-- Dynamic background blobs -->
-<div class="bg-canvas">
-  <div class="blob blob-1"></div>
-  <div class="blob blob-2"></div>
-  <div class="blob blob-3"></div>
-</div>
-
-<!-- Grain texture -->
+<!-- Canvas animated dot grid background -->
+<canvas id="canvas-bg"></canvas>
 <div class="grain"></div>
-
-<!-- Scroll progress -->
 <div id="progress-bar"><div id="progress-fill"></div></div>
 
-<!-- Main content -->
-<div class="page-wrap">
+<div class="page">
 
-  <!-- Profile Header -->
-  <header class="profile fade-up" style="animation-delay:0s">
-    <div class="avatar-wrap">
+  <!-- ── Profile Header ── -->
+  <header class="profile gsap-hidden" id="hdr">
+    <div class="avatar-ring">
       <img src="logo.jpg" alt="VAYLA logo" class="avatar"/>
     </div>
-    <div class="profile-text">
+    <div class="profile-info">
       <p class="profile-tag">Official links · Web3</p>
       <h1 class="profile-name">VAYLA</h1>
       <p class="profile-desc">Official links & community hub. Access the ecosystem, join the conversation, track the token.</p>
     </div>
-    <div class="status-badge">
-      <span class="status-dot"></span>
+    <div class="status-pill">
+      <span class="dot-live"></span>
       Active
     </div>
   </header>
 
-  <!-- Links -->
-  <div class="links-grid">
+  <!-- ── Links ── -->
+  <div id="links">
 
-    <!-- Top row: Website (big hero) + Arena -->
-    <div class="links-grid-top">
-      <a class="link-card hero fade-up" href="https://vayla.io/" target="_blank" rel="noopener noreferrer" style="animation-delay:0.08s; --delay:0.3s;">
-        <div class="card-top">
-          <span class="card-chip">[Core]</span>
-          <i class="fas fa-arrow-up-right-from-square card-icon"></i>
+    <!-- Top row: Website hero + Arena -->
+    <div class="grid-top">
+      <a class="card card-hero gsap-hidden" href="https://vayla.io/" target="_blank" rel="noopener noreferrer">
+        <div class="card-hero-bg"></div>
+        <div class="card-top-row" style="position:relative;z-index:1;">
+          <span class="chip">[Core]</span>
+          <i class="fas fa-arrow-up-right-from-square card-icon-top" style="position:relative;z-index:1;"></i>
         </div>
-        <div class="card-bottom">
-          <div class="card-title">Official Website</div>
+        <div style="position:relative;z-index:1;">
+          <div class="card-title card-title-lg">Official Website</div>
           <div class="card-sub">vayla.io</div>
         </div>
       </a>
 
-      <a class="link-card fade-up" href="https://vayla-arena.com/" target="_blank" rel="noopener noreferrer" style="animation-delay:0.14s; --delay:0.7s;">
-        <div class="card-top">
-          <span class="card-chip">[Arena]</span>
-          <i class="fas fa-gamepad card-icon"></i>
+      <a class="card gsap-hidden" href="https://vayla-arena.com/" target="_blank" rel="noopener noreferrer">
+        <div class="card-top-row">
+          <span class="chip">[Arena]</span>
+          <i class="fas fa-gamepad card-icon-top"></i>
         </div>
-        <div class="card-bottom">
+        <div>
           <div class="card-title">VAYLA Arena</div>
           <div class="card-sub">Play & Earn</div>
         </div>
       </a>
     </div>
 
-    <!-- Whitepaper — full width -->
-    <a class="link-card fade-up" href="(EN)_VAYLA_WHITEPAPER_v3.8.pdf" target="_blank" rel="noopener noreferrer"
-       style="flex-direction:row; align-items:center; justify-content:space-between; animation-delay:0.20s; --delay:1.1s; gap:0;">
-      <div style="display:flex; align-items:center; gap:1rem;">
-        <i class="fas fa-file-pdf" style="font-size:1.4rem; color:var(--text-muted);"></i>
+    <!-- Whitepaper row -->
+    <a class="card card-row gsap-hidden" href="(EN)_VAYLA_WHITEPAPER_v3.8.pdf" target="_blank" rel="noopener noreferrer" style="margin-top:0.75rem;">
+      <div class="card-row-left">
+        <div class="card-row-icon"><i class="fas fa-file-pdf"></i></div>
         <div>
           <div class="card-title" style="font-size:0.95rem;">Whitepaper</div>
           <div class="card-sub">VAYLA v3.8 — PDF</div>
         </div>
       </div>
-      <div style="display:flex; align-items:center; gap:0.6rem;">
-        <span class="card-chip">[Docs]</span>
-        <i class="fas fa-download card-icon" style="font-size:0.9rem;"></i>
+      <div style="display:flex;align-items:center;gap:0.6rem;flex-shrink:0;">
+        <span class="chip">[Docs]</span>
+        <i class="fas fa-download card-icon-top"></i>
       </div>
     </a>
 
+    <!-- Market section -->
     <div class="divider"></div>
-    <p class="section-label">Market Data</p>
+    <p class="section-label">Market data</p>
 
-    <!-- CoinGecko + CoinMarketCap -->
-    <div class="links-row-2">
-      <a class="link-card fade-up" href="https://www.coingecko.com/en/coins/vayla-2" target="_blank" rel="noopener noreferrer" style="animation-delay:0.26s; --delay:1.4s;">
-        <div class="card-top">
-          <span class="card-chip" style="color:#8dc63f; border-color:rgba(141,198,63,0.3); background:rgba(141,198,63,0.07);">[Market]</span>
-          <i class="fas fa-coins card-icon" style="color:#8dc63f;"></i>
+    <div class="grid-2">
+      <a class="card gsap-hidden" href="https://www.coingecko.com/en/coins/vayla-2" target="_blank" rel="noopener noreferrer">
+        <div class="card-top-row">
+          <span class="chip" style="color:#8dc63f;border-color:rgba(141,198,63,0.35);background:rgba(141,198,63,0.08);">[Market]</span>
+          <i class="fas fa-coins card-icon-top" style="color:#8dc63f;"></i>
         </div>
-        <div class="card-bottom">
+        <div>
           <div class="card-title">CoinGecko</div>
           <div class="card-sub">View VAYLA charts</div>
         </div>
       </a>
 
-      <a class="link-card fade-up" href="https://coinmarketcap.com/currencies/vayla/" target="_blank" rel="noopener noreferrer" style="animation-delay:0.32s; --delay:1.8s;">
-        <div class="card-top">
-          <span class="card-chip" style="color:#1657ef; border-color:rgba(22,87,239,0.3); background:rgba(22,87,239,0.07);">[Market]</span>
-          <svg class="card-icon" style="width:1.1rem; height:1.1rem; fill:currentColor;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <a class="card gsap-hidden" href="https://coinmarketcap.com/currencies/vayla/" target="_blank" rel="noopener noreferrer">
+        <div class="card-top-row">
+          <span class="chip" style="color:#1a6ff5;border-color:rgba(26,111,245,0.35);background:rgba(26,111,245,0.08);">[Market]</span>
+          <svg class="card-icon-top" style="width:1rem;height:1rem;fill:currentColor;color:#1a6ff5;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path d="M20.738 14.341c-.419.265-.912.298-1.286.087-.476-.27-.738-.898-.738-1.774v-2.618c0-1.264-.5-2.164-1.336-2.407-1.416-.413-2.482 1.32-2.882 1.972l-2.498 4.05v-4.95c-.028-1.14-.398-1.821-1.1-2.027-.466-.135-1.161-.081-1.837.953l-5.597 8.987A9.875 9.875 0 0 1 2.326 12c0-5.414 4.339-9.818 9.672-9.818 5.332 0 9.67 4.404 9.67 9.818.004.018.002.034.003.053.05 1.049-.29 1.883-.933 2.29zm3.08-2.34-.001-.055C23.787 5.353 18.497 0 11.997 0 5.48 0 .177 5.383.177 12c0 6.616 5.303 12 11.82 12 2.991 0 5.846-1.137 8.037-3.2.435-.41.46-1.1.057-1.541a1.064 1.064 0 0 0-1.519-.059 9.56 9.56 0 0 1-6.574 2.618c-2.856 0-5.425-1.263-7.197-3.268l5.048-8.105v3.737c0 1.794.696 2.374 1.28 2.544.584.17 1.476.054 2.413-1.468.998-1.614 2.025-3.297 3.023-4.88v2.276c0 1.678.672 3.02 1.843 3.68 1.056.597 2.384.543 3.465-.14 1.312-.828 2.018-2.354 1.944-4.193z"/>
           </svg>
         </div>
-        <div class="card-bottom">
+        <div>
           <div class="card-title">CoinMarketCap</div>
           <div class="card-sub">Track VAYLA</div>
         </div>
       </a>
     </div>
 
-    <!-- Zealy — full width -->
-    <a class="link-card fade-up" href="https://zealy.io/cw/vayla" target="_blank" rel="noopener noreferrer"
-       style="flex-direction:row; align-items:center; justify-content:space-between; animation-delay:0.38s; --delay:2.1s; gap:0;">
-      <div style="display:flex; align-items:center; gap:1rem;">
-        <i class="fas fa-award" style="font-size:1.4rem; color:#00b5ad;"></i>
+    <!-- Zealy -->
+    <a class="card card-row gsap-hidden" href="https://zealy.io/cw/vayla" target="_blank" rel="noopener noreferrer" style="margin-top:0.75rem;">
+      <div class="card-row-left">
+        <div class="card-row-icon" style="color:#00b5ad;background:rgba(0,181,173,0.1);">
+          <i class="fas fa-award"></i>
+        </div>
         <div>
           <div class="card-title" style="font-size:0.95rem;">Zealy — Quests</div>
           <div class="card-sub">Earn rewards & complete quests</div>
         </div>
       </div>
-      <span class="card-chip" style="color:#00b5ad; border-color:rgba(0,181,173,0.3); background:rgba(0,181,173,0.07);">[Quests]</span>
+      <span class="chip" style="color:#00b5ad;border-color:rgba(0,181,173,0.35);background:rgba(0,181,173,0.08);flex-shrink:0;">[Quests]</span>
     </a>
 
+    <!-- Community section -->
     <div class="divider"></div>
     <p class="section-label">Community channels</p>
 
-    <!-- Social 3-col -->
-    <div class="links-row-3">
-      <a class="link-card fade-up" href="https://x.com/VAYLAOfficial_" target="_blank" rel="noopener noreferrer" style="animation-delay:0.44s; --delay:2.4s;">
-        <div class="card-top">
-          <span class="card-chip">[Social]</span>
-          <svg class="card-icon" style="width:1rem;height:1rem;fill:currentColor;" viewBox="0 0 24 24">
+    <div class="grid-3">
+      <!-- X -->
+      <a class="card gsap-hidden" href="https://x.com/VAYLAOfficial_" target="_blank" rel="noopener noreferrer">
+        <div class="card-top-row">
+          <span class="chip">[Social]</span>
+          <svg class="card-icon-top" style="width:1rem;height:1rem;fill:currentColor;" viewBox="0 0 24 24">
             <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
           </svg>
         </div>
-        <div class="card-bottom">
+        <div>
           <div class="card-title">X (Twitter)</div>
           <div class="card-sub">Official updates</div>
         </div>
       </a>
 
-      <a class="link-card fade-up" href="https://t.me/Vayla_Vaylian" target="_blank" rel="noopener noreferrer" style="animation-delay:0.50s; --delay:2.7s;">
-        <div class="card-top">
-          <span class="card-chip" style="color:#27a0e0; border-color:rgba(39,160,224,0.3); background:rgba(39,160,224,0.07);">[Comms]</span>
-          <i class="fab fa-telegram-plane card-icon" style="color:#27a0e0;"></i>
+      <!-- Telegram -->
+      <a class="card gsap-hidden" href="https://t.me/Vayla_Vaylian" target="_blank" rel="noopener noreferrer">
+        <div class="card-top-row">
+          <span class="chip" style="color:#29a8e0;border-color:rgba(41,168,224,0.35);background:rgba(41,168,224,0.08);">[Comms]</span>
+          <i class="fab fa-telegram-plane card-icon-top" style="color:#29a8e0;"></i>
         </div>
-        <div class="card-bottom">
+        <div>
           <div class="card-title">Telegram</div>
           <div class="card-sub">Join the conversation</div>
         </div>
       </a>
 
-      <a class="link-card fade-up" href="https://discord.gg/gM8EfBH6Vu" target="_blank" rel="noopener noreferrer" style="animation-delay:0.56s; --delay:3.0s;">
-        <div class="card-top">
-          <span class="card-chip" style="color:#5865f2; border-color:rgba(88,101,242,0.3); background:rgba(88,101,242,0.07);">[Comms]</span>
-          <i class="fab fa-discord card-icon" style="color:#5865f2;"></i>
+      <!-- Discord -->
+      <a class="card gsap-hidden" href="https://discord.gg/gM8EfBH6Vu" target="_blank" rel="noopener noreferrer">
+        <div class="card-top-row">
+          <span class="chip" style="color:#5865f2;border-color:rgba(88,101,242,0.35);background:rgba(88,101,242,0.08);">[Comms]</span>
+          <i class="fab fa-discord card-icon-top" style="color:#5865f2;"></i>
         </div>
-        <div class="card-bottom">
+        <div>
           <div class="card-title">Discord</div>
           <div class="card-sub">Community & support</div>
         </div>
       </a>
     </div>
 
-    <!-- LinkedIn — full width -->
-    <a class="link-card fade-up" href="https://www.linkedin.com/company/vaylatechnology/" target="_blank" rel="noopener noreferrer"
-       style="flex-direction:row; align-items:center; justify-content:space-between; animation-delay:0.62s; --delay:3.3s; gap:0;">
-      <div style="display:flex; align-items:center; gap:1rem;">
-        <i class="fab fa-linkedin-in" style="font-size:1.4rem; color:#0a66c2;"></i>
+    <!-- LinkedIn -->
+    <a class="card card-row gsap-hidden" href="https://www.linkedin.com/company/vaylatechnology/" target="_blank" rel="noopener noreferrer" style="margin-top:0.75rem;">
+      <div class="card-row-left">
+        <div class="card-row-icon" style="color:#0a66c2;background:rgba(10,102,194,0.12);">
+          <i class="fab fa-linkedin-in"></i>
+        </div>
         <div>
           <div class="card-title" style="font-size:0.95rem;">LinkedIn</div>
           <div class="card-sub">VAYLA Technology</div>
         </div>
       </div>
-      <span class="card-chip" style="color:#0a66c2; border-color:rgba(10,102,194,0.3); background:rgba(10,102,194,0.07);">[Social]</span>
+      <span class="chip" style="color:#0a66c2;border-color:rgba(10,102,194,0.35);background:rgba(10,102,194,0.08);flex-shrink:0;">[Social]</span>
     </a>
-
   </div>
 
-  <!-- Footer -->
-  <footer class="fade-up" style="animation-delay:0.7s">
-    <p class="footer-text">&copy; 2026 VAYLA. All rights reserved.</p>
+  <footer class="gsap-hidden" id="ftr">
+    <p class="footer-txt">&copy; 2026 VAYLA. All rights reserved.</p>
   </footer>
 </div>
 
 <script>
-  // Scroll progress bar
-  const fill = document.getElementById('progress-fill');
-  window.addEventListener('scroll', () => {
-    const scrolled = document.documentElement.scrollTop;
-    const max = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-    fill.style.height = (max > 0 ? (scrolled / max) * 100 : 0) + '%';
+/* ══════════════════════════════════════
+   CANVAS ANIMATED DOT GRID BACKGROUND
+══════════════════════════════════════ */
+(function () {
+  const canvas = document.getElementById('canvas-bg');
+  const ctx    = canvas.getContext('2d');
+
+  let W, H, dots = [];
+  let mouse = { x: -9999, y: -9999 };
+
+  const DOT_SPACING = 38;
+  const DOT_R       = 1.2;
+  const DOT_COL     = 'rgba(77,141,247,0.22)';
+  const MOUSE_RAD   = 160;
+  const MOUSE_BOOST = 0.55;
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    buildDots();
+  }
+
+  function buildDots() {
+    dots = [];
+    const cols = Math.ceil(W / DOT_SPACING) + 2;
+    const rows = Math.ceil(H / DOT_SPACING) + 2;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        dots.push({
+          x: c * DOT_SPACING,
+          y: r * DOT_SPACING,
+          ox: c * DOT_SPACING,
+          oy: r * DOT_SPACING,
+          vx: 0, vy: 0,
+          phase: Math.random() * Math.PI * 2
+        });
+      }
+    }
+  }
+
+  function tick(t) {
+    ctx.clearRect(0, 0, W, H);
+
+    // Radial blue glow blobs (animated)
+    const t1 = t * 0.0003;
+    const bx1 = W * 0.15 + Math.sin(t1)       * 80;
+    const by1 = H * 0.15 + Math.cos(t1 * 0.7) * 60;
+    const b1 = ctx.createRadialGradient(bx1, by1, 0, bx1, by1, 420);
+    b1.addColorStop(0, 'rgba(30,70,200,0.18)');
+    b1.addColorStop(1, 'transparent');
+    ctx.fillStyle = b1;
+    ctx.fillRect(0, 0, W, H);
+
+    const bx2 = W * 0.82 + Math.cos(t1 * 0.8) * 70;
+    const by2 = H * 0.78 + Math.sin(t1 * 0.6) * 80;
+    const b2 = ctx.createRadialGradient(bx2, by2, 0, bx2, by2, 380);
+    b2.addColorStop(0, 'rgba(20,55,180,0.14)');
+    b2.addColorStop(1, 'transparent');
+    ctx.fillStyle = b2;
+    ctx.fillRect(0, 0, W, H);
+
+    // Dots with mouse repulsion
+    for (const d of dots) {
+      // Gentle float
+      d.oy = d.y + Math.sin(t * 0.0008 + d.phase) * 1.5;
+      d.ox = d.x + Math.cos(t * 0.0006 + d.phase) * 1.0;
+
+      // Mouse proximity glow
+      const dx = d.ox - mouse.x;
+      const dy = d.oy - mouse.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const prox = Math.max(0, 1 - dist / MOUSE_RAD);
+
+      const r = DOT_R + prox * 2.5;
+      const alpha = 0.22 + prox * MOUSE_BOOST;
+
+      ctx.beginPath();
+      ctx.arc(d.ox, d.oy, r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(77,141,247,${alpha})`;
+      ctx.fill();
+    }
+
+    requestAnimationFrame(tick);
+  }
+
+  window.addEventListener('resize', resize, { passive: true });
+  window.addEventListener('mousemove', e => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+  }, { passive: true });
+  window.addEventListener('touchmove', e => {
+    mouse.x = e.touches[0].clientX;
+    mouse.y = e.touches[0].clientY;
   }, { passive: true });
 
-  // Spotlight border: track mouse per card
-  document.querySelectorAll('.link-card').forEach(card => {
-    card.addEventListener('mousemove', e => {
-      const rect = card.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 100;
-      const y = ((e.clientY - rect.top) / rect.height) * 100;
-      card.style.setProperty('--mouse-x', x + '%');
-      card.style.setProperty('--mouse-y', y + '%');
-    });
+  resize();
+  requestAnimationFrame(tick);
+})();
+
+/* ══════════════════════════════════════
+   SCROLL PROGRESS
+══════════════════════════════════════ */
+const fill = document.getElementById('progress-fill');
+window.addEventListener('scroll', () => {
+  const s = document.documentElement.scrollTop;
+  const m = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  fill.style.height = (m > 0 ? (s / m) * 100 : 0) + '%';
+}, { passive: true });
+
+/* ══════════════════════════════════════
+   SPOTLIGHT BORDER — cursor tracking per card
+══════════════════════════════════════ */
+document.querySelectorAll('.card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    const x = ((e.clientX - r.left) / r.width)  * 100;
+    const y = ((e.clientY - r.top)  / r.height) * 100;
+    card.style.setProperty('--mx', x + '%');
+    card.style.setProperty('--my', y + '%');
   });
+});
+
+/* ══════════════════════════════════════
+   GSAP STAGGERED ENTRY
+══════════════════════════════════════ */
+gsap.registerPlugin(ScrollTrigger);
+
+// Header
+gsap.fromTo('#hdr',
+  { opacity: 0, y: 28 },
+  { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', delay: 0.1 }
+);
+
+// All cards cascade
+gsap.fromTo('.gsap-hidden:not(#hdr):not(#ftr)',
+  { opacity: 0, y: 24 },
+  {
+    opacity: 1, y: 0,
+    duration: 0.55,
+    ease: 'power3.out',
+    stagger: 0.07,
+    delay: 0.25,
+    scrollTrigger: {
+      trigger: '#links',
+      start: 'top 90%',
+    }
+  }
+);
+
+// Footer
+gsap.fromTo('#ftr',
+  { opacity: 0 },
+  { opacity: 1, duration: 0.5, ease: 'power2.out', delay: 0.9 }
+);
 </script>
 </body>
 </html>
