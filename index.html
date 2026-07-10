@@ -23,32 +23,32 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      /* Deep space navy base - dark but elegant */
-      --bg:            #070a18;
+      /* Deep space Zinc base - dark but clean charcoal, not pitch black */
+      --bg:            #09090b;
 
-      /* Cards are distinctly lighter than the background for maximum visibility */
-      --card:          #16234b;
-      --card-hover:    #243770;   /* Lightens significantly on hover, never darkens */
-      --card-active:   #2e448a;
+      /* Cards are distinctly lighter and stand out sharply from the background */
+      --card:          #1f1f23;
+      --card-hover:    #2c2c35;   /* Lightens significantly on hover, never darkens */
+      --card-active:   #3a3a42;
 
-      /* Borders - highly visible but clean */
-      --border:        rgba(129, 140, 248, 0.28);
-      --border-hover:  rgba(129, 140, 248, 0.65);
-      --border-accent: rgba(59, 130, 246, 0.90);
+      /* Borders - crisp, visible and clean */
+      --border:        rgba(255, 255, 255, 0.08);
+      --border-hover:  rgba(96, 165, 250, 0.50);
+      --border-accent: rgba(96, 165, 250, 0.85);
 
       /* Typography & Contrast */
       --t1:            #ffffff;   /* Pure white for headings */
-      --t2:            #c3d1f5;   /* Light indigo-gray for description */
-      --t3:            #818cf8;   /* Bright purple-blue for tags/labels */
+      --t2:            #a1a1aa;   /* Zinc-400 for highly legible descriptions */
+      --t3:            #71717a;   /* Zinc-500 for muted metadata */
 
       /* Single Accent */
-      --acc:           #60a5fa;   /* Bright sky-blue */
-      --acc-dim:       rgba(96, 165, 250, 0.15);
-      --acc-glow:      rgba(96, 165, 250, 0.40);
+      --acc:           #38bdf8;   /* Sky blue accent */
+      --acc-dim:       rgba(56, 189, 248, 0.12);
+      --acc-glow:      rgba(56, 189, 248, 0.35);
 
       /* Premium Shadows */
-      --sh-card:  0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.05);
-      --sh-hover: 0 12px 32px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.12), 0 0 20px var(--acc-glow);
+      --sh-card:  0 4px 20px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+      --sh-hover: 0 12px 32px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.12), 0 0 20px var(--acc-glow);
 
       --font: 'Sora', system-ui, sans-serif;
       --mono: 'JetBrains Mono', monospace;
@@ -186,7 +186,7 @@
       padding: 0.3rem 0.7rem;
       border: 1px solid var(--border);
       border-radius: 999px;
-      background: rgba(22, 35, 75, 0.8);
+      background: rgba(31, 31, 35, 0.85);
       align-self: flex-start;
       white-space: nowrap;
     }
@@ -687,7 +687,7 @@
     const bx1 = W * 0.15 + Math.sin(t1)       * 80;
     const by1 = H * 0.15 + Math.cos(t1 * 0.7) * 60;
     const b1 = ctx.createRadialGradient(bx1, by1, 0, bx1, by1, 420);
-    b1.addColorStop(0, 'rgba(30,70,200,0.18)');
+    b1.addColorStop(0, 'rgba(56,189,248,0.05)');
     b1.addColorStop(1, 'transparent');
     ctx.fillStyle = b1;
     ctx.fillRect(0, 0, W, H);
@@ -695,7 +695,7 @@
     const bx2 = W * 0.82 + Math.cos(t1 * 0.8) * 70;
     const by2 = H * 0.78 + Math.sin(t1 * 0.6) * 80;
     const b2 = ctx.createRadialGradient(bx2, by2, 0, bx2, by2, 380);
-    b2.addColorStop(0, 'rgba(20,55,180,0.14)');
+    b2.addColorStop(0, 'rgba(99,102,241,0.04)');
     b2.addColorStop(1, 'transparent');
     ctx.fillStyle = b2;
     ctx.fillRect(0, 0, W, H);
@@ -710,12 +710,12 @@
       const dist = Math.sqrt(dx * dx + dy * dy);
       const prox = Math.max(0, 1 - dist / MOUSE_RAD);
 
-      const r = DOT_R + prox * 2.5;
-      const alpha = 0.22 + prox * MOUSE_BOOST;
+      const r = DOT_R + prox * 1.5;
+      const alpha = (0.15 + prox * MOUSE_BOOST) * 0.35;
 
       ctx.beginPath();
       ctx.arc(d.ox, d.oy, r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(96,165,250,${alpha})`;
+      ctx.fillStyle = `rgba(56,189,248,${alpha})`;
       ctx.fill();
     }
 
