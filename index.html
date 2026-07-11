@@ -122,8 +122,7 @@
 
     /* ═══ HERO ═══ */
     .hero {
-      display: grid;
-      grid-template-columns: auto 1fr 220px;
+      display: flex;
       align-items: center;
       gap: clamp(1rem, 3vw, 2rem);
       padding-bottom: 1.2rem;
@@ -131,7 +130,7 @@
       border-bottom: 1px solid var(--line);
     }
 
-    .hero-in { display: flex; align-items: center; gap: clamp(1rem, 3vw, 2rem); }
+    .hero-in { display: flex; align-items: center; gap: clamp(1rem, 3vw, 2rem); width: 100%; }
     .avatar-ring { position: relative; flex-shrink: 0; }
     .avatar-ring::before, .avatar-ring::after {
       content: ''; position: absolute; border-radius: 50%; pointer-events: none;
@@ -170,56 +169,6 @@
       max-width: 48ch; letter-spacing: 0.01em;
     }
     .hero-desc b { color: var(--ink); font-weight: 500; }
-
-    .hero-credit {
-      font-family: var(--mono); font-size: 0.64rem;
-      color: var(--cyan); letter-spacing: 0.08em;
-      animation: breathe-neon 2.6s ease-in-out infinite; opacity: 0.9;
-      margin-top: 0.5rem;
-      grid-column: 1 / -1;
-    }
-    @keyframes breathe-neon {
-      0%, 100% { text-shadow: 0 0 4px rgba(32,230,230,0.4), 0 0 8px rgba(32,230,230,0.2); opacity: 0.7; }
-      50%      { text-shadow: 0 0 10px rgba(32,230,230,0.8), 0 0 24px rgba(32,230,230,0.4), 0 0 40px rgba(32,230,230,0.15); opacity: 1; }
-    }
-
-    /* LinkedIn mini-card in hero */
-    .hero-in-card {
-      min-width: 0;
-      border: 1px solid var(--line); border-radius: var(--r-card);
-      overflow: hidden; transition: border-color 0.3s, transform 0.3s;
-      background: var(--card);
-    }
-    @media (hover: hover) {
-      .hero-in-card:hover { border-color: var(--line-accent); transform: translateY(-2px); }
-    }
-    .hero-in-card .hic-visual {
-      height: 62px;
-      background: linear-gradient(135deg, rgba(10,102,194,0.3), rgba(10,102,194,0.08));
-      display: flex; align-items: center; justify-content: center;
-      position: relative; overflow: hidden;
-    }
-    .hero-in-card .hic-visual::after {
-      content: ''; position: absolute; inset: 0;
-      background: radial-gradient(circle at 70% 30%, rgba(10,102,194,0.25), transparent 70%);
-    }
-    .hero-in-card .hic-visual img {
-      width: 36px; height: 36px; object-fit: contain; position: relative; z-index: 1;
-    }
-    .hero-in-card .hic-body {
-      padding: 0.55rem 0.8rem;
-    }
-    .hero-in-card .hic-body .hic-title {
-      font-size: 0.7rem; font-weight: 700; letter-spacing: -0.01em; color: var(--ink);
-    }
-    .hero-in-card .hic-body .hic-sub {
-      font-family: var(--mono); font-size: 0.56rem; color: var(--ink-mute); letter-spacing: 0.04em; margin-top: 0.1rem;
-    }
-    .hero-in-card .hic-tag {
-      font-family: var(--mono); font-size: 0.54rem; letter-spacing: 0.1em;
-      text-transform: uppercase; color: var(--cyan);
-      padding: 0.3rem 0.8rem 0.5rem;
-    }
 
     /* ═══ MARQUEE ═══ */
     .marquee {
@@ -355,6 +304,7 @@
       gap: 0.85rem;
       margin-bottom: 0.85rem;
     }
+    .card-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
     @media (max-width: 820px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 600px) { .card-grid { grid-template-columns: 1fr; } }
 
@@ -400,7 +350,6 @@
       .marquee-track { animation: none !important; }
       .avatar-ring::before, .avatar-ring::after { display: none; }
       .rise { opacity: 1; transform: none; }
-      .hero-credit { animation: none !important; text-shadow: none; opacity: 0.6; }
       .divider3d canvas { display: none; }
       .divider3d { height: 30px; }
     }
@@ -413,8 +362,6 @@
       .hero-name { font-size: clamp(1.8rem, 12vw, 2.6rem); }
       .hero-desc { font-size: 0.72rem; }
       .hero-eyebrow { font-size: 0.65rem; }
-      .hero-credit { font-size: 0.58rem; margin-top: 0.2rem; }
-      .hero-in-card { display: none; }
       .hero-in { gap: 0.6rem; }
       .page { padding: 1.5rem 1rem 3rem; }
       .card-visual { flex: 0 0 110px; }
@@ -428,8 +375,6 @@
     }
 
     /* Re-show LinkedIn as normal card on mobile (after Community section) */
-    .mob-linkedin { display: none; }
-    @media (max-width: 600px) { .mob-linkedin { display: block; } }
   </style>
   <script type="importmap">
     { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
@@ -456,18 +401,6 @@
         <p class="hero-desc"><b>Music meets Web3.</b> Official channels, arena, quests and drops for the VAYLA ecosystem.</p>
       </div>
     </div>
-
-    <a class="hero-in-card" href="https://www.linkedin.com/company/vaylatechnology/" target="_blank" rel="noopener noreferrer">
-      <div class="hic-visual">
-        <img src="https://cdn.jsdelivr.net/npm/simple-icons@v14/icons/linkedin.svg" alt="LinkedIn" width="36" height="36" style="filter:invert(1);"/>
-      </div>
-      <div class="hic-body">
-        <div class="hic-title">LinkedIn</div>
-        <div class="hic-sub">VAYLA Technology</div>
-      </div>
-      <div class="hic-tag">Business</div>
-    </a>
-    <p class="hero-credit">Created by Pham Thanh Binh · binhpt310@vayla.io / theshield310@gmail.com</p>
   </header>
 
   <div class="marquee" aria-hidden="true">
@@ -569,10 +502,10 @@
 
   <div class="sec-head rise" style="margin-top: 0; animation-delay: 700ms;">
     <h2>Community</h2>
-    <span class="count">/ 03</span>
+    <span class="count">/ 04</span>
   </div>
 
-  <div class="card-grid">
+  <div class="card-grid cols-4">
     <a class="card rise" href="https://x.com/VAYLAOfficial_" target="_blank" rel="noopener noreferrer" style="animation-delay: 760ms;">
       <div class="card-visual">
         <span class="bg-img" style="background-image:url('https://www.google.com/s2/favicons?domain=x.com&sz=128');background-size:55% auto;opacity:0.85;"></span>
@@ -606,23 +539,21 @@
         <div class="card-bot"><span class="arrow">Join <span>→</span></span></div>
       </div>
     </a>
+    <a class="card rise" href="https://www.linkedin.com/company/vaylatechnology/" target="_blank" rel="noopener noreferrer" style="animation-delay: 940ms;">
+      <div class="card-visual">
+        <span class="bg-img" style="background-image:url('https://www.google.com/s2/favicons?domain=linkedin.com&sz=128');background-size:55% auto;opacity:0.85;"></span>
+      </div>
+      <div class="card-meta">
+        <span class="chip" style="color:#38bdf8;border-color:rgba(56,189,248,0.4);">Business</span>
+        <div class="card-title">LinkedIn · VAYLA Technology</div>
+        <div class="card-sub">Official company page</div>
+        <div class="card-bot"><span class="arrow">Connect <span>→</span></span></div>
+      </div>
+    </a>
   </div>
 
-  <!-- LinkedIn card for mobile (hidden on desktop, hero-in-card instead) -->
-  <a class="card mob-linkedin" href="https://www.linkedin.com/company/vaylatechnology/" target="_blank" rel="noopener noreferrer" style="margin-top:0.85rem;">
-    <div class="card-visual">
-      <span class="bg-img" style="background-image:url('https://www.google.com/s2/favicons?domain=linkedin.com&sz=128');background-size:55% auto;opacity:0.85;"></span>
-    </div>
-    <div class="card-meta">
-      <span class="chip" style="color:var(--cyan);border-color:rgba(32,230,230,0.4);">Business</span>
-      <div class="card-title">LinkedIn · VAYLA Technology</div>
-      <div class="card-sub">Official company page</div>
-      <div class="card-bot"><span class="arrow">Connect <span>→</span></span></div>
-    </div>
-  </a>
-
-  <footer class="rise" style="animation-delay: 940ms;">
-    <span class="foot-l">© 2026 VAYLA · All rights reserved</span>
+  <footer class="rise" style="animation-delay: 1000ms;">
+    <span class="foot-l">© 2026 VAYLA · Created by Pham Thanh Binh · binhpt310@vayla.io</span>
     <span class="foot-r"><span class="dot"></span>Built for the Vaylian community</span>
   </footer>
 </main>
@@ -722,7 +653,7 @@
     const coinGroup = new THREE.Group();
     scene.add(coinGroup);
 
-    /* ── VAYLA Token Coin ── */
+    /* ── VAYLA Token Coin (cylinder, faces point along ±Z toward camera) ── */
     const coinGeo = new THREE.CylinderGeometry(0.65, 0.65, 0.15, 64);
     const coinMat = new THREE.MeshStandardMaterial({
       color: 0x20E6E6, metalness: 0.7, roughness: 0.25,
@@ -732,7 +663,7 @@
     coin.rotation.x = Math.PI * 0.5;
     coinGroup.add(coin);
 
-    /* Edge ring */
+    /* Edge ring wrapping the coin rim */
     const ringGeo = new THREE.TorusGeometry(0.67, 0.04, 16, 64);
     const ringMat = new THREE.MeshStandardMaterial({
       color: 0x20E6E6, metalness: 0.9, roughness: 0.1,
@@ -742,39 +673,47 @@
     ring.rotation.x = Math.PI * 0.5;
     coinGroup.add(ring);
 
-    /* VAYLA logo texture from real image */
+    /* VAYLA logo on BOTH coin faces. Planes are children of coinGroup so they
+       flip together with the coin. After coin.rotation.x = PI/2 the cylinder
+       faces sit at world z = ±0.075, so the logos go there. A plane defaults
+       to facing +Z; the back face is rotated PI around Y to face -Z. */
     const textureLoader = new THREE.TextureLoader();
     const logoTexture = textureLoader.load('logo.jpg');
     logoTexture.colorSpace = THREE.SRGBColorSpace;
 
-    const logoPlane1 = new THREE.Mesh(
-      new THREE.PlaneGeometry(1.15, 1.15),
-      new THREE.MeshBasicMaterial({ map: logoTexture, transparent: true, opacity: 0.92, depthWrite: false })
-    );
-    logoPlane1.position.y = 0.076;
+    const logoMatFront = new THREE.MeshBasicMaterial({
+      map: logoTexture, transparent: true, opacity: 0.95, depthWrite: false, side: THREE.FrontSide
+    });
+    const logoPlane1 = new THREE.Mesh(new THREE.PlaneGeometry(1.05, 1.05), logoMatFront);
+    logoPlane1.position.z = 0.076;
     coinGroup.add(logoPlane1);
-    const logoPlane2 = logoPlane1.clone();
-    logoPlane2.position.y = -0.076;
+
+    const logoPlane2 = new THREE.Mesh(new THREE.PlaneGeometry(1.05, 1.05), logoMatFront.clone());
+    logoPlane2.material.map = logoTexture;
+    logoPlane2.position.z = -0.076;
     logoPlane2.rotation.y = Math.PI;
     coinGroup.add(logoPlane2);
 
-    /* ── Orbiting Concept Objects ── */
+    /* ── Orbiting Concept Objects (each on its own 3D-inclined orbit plane) ── */
     const orbitGroup = new THREE.Group();
     scene.add(orbitGroup);
 
+    /* incl = orbit-plane tilt off the XZ equator; node = rotation of that
+       tilted plane around the Y axis. Together they give each object a
+       unique 3D orbit instead of a shared flat ring. */
     const orbitItems = [
       /* Ring — K-Arena / community loop */
-      { geo: new THREE.TorusGeometry(0.16, 0.04, 8, 24), dist: 1.55, speed: 0.7, phase: 0, label: 'ring' },
+      { geo: new THREE.TorusGeometry(0.16, 0.04, 8, 24), dist: 1.55, speed: 0.7, phase: 0, incl: 0.35, node: 0.0, label: 'ring' },
       /* Diamond — crypto value, gem token */
-      { geo: new THREE.OctahedronGeometry(0.18, 0), dist: 1.85, speed: 0.48, phase: 1.2, label: 'diamond' },
+      { geo: new THREE.OctahedronGeometry(0.18, 0), dist: 1.85, speed: 0.48, phase: 1.2, incl: -0.55, node: 1.1, label: 'diamond' },
       /* Knot — K-pop melody, tangled energy */
-      { geo: new THREE.TorusKnotGeometry(0.12, 0.04, 48, 8), dist: 1.65, speed: 0.58, phase: 2.4, label: 'knot' },
+      { geo: new THREE.TorusKnotGeometry(0.12, 0.04, 48, 8), dist: 1.65, speed: 0.58, phase: 2.4, incl: 0.8, node: 2.2, label: 'knot' },
       /* Star — idol spotlight, 5-point */
-      { geo: (() => { const s = new THREE.Shape(); for (let j=0;j<10;j++){ const a=j*Math.PI/5-Math.PI/2; const r=j%2===0?0.2:0.09; s.lineTo(Math.cos(a)*r,Math.sin(a)*r); } s.closePath(); return new THREE.ExtrudeGeometry(s,{depth:0.07,bevelEnabled:true,bevelThickness:0.02,bevelSize:0.02}); })(), dist: 2.0, speed: 0.38, phase: 3.6, label: 'star' },
+      { geo: (() => { const s = new THREE.Shape(); for (let j=0;j<10;j++){ const a=j*Math.PI/5-Math.PI/2; const r=j%2===0?0.2:0.09; s.lineTo(Math.cos(a)*r,Math.sin(a)*r); } s.closePath(); return new THREE.ExtrudeGeometry(s,{depth:0.07,bevelEnabled:true,bevelThickness:0.02,bevelSize:0.02}); })(), dist: 2.0, speed: 0.38, phase: 3.6, incl: -0.3, node: 3.3, label: 'star' },
       /* Cone — stage spotlight beam */
-      { geo: new THREE.ConeGeometry(0.12, 0.32, 6, 1), dist: 1.5, speed: 0.62, phase: 4.8, label: 'spotlight' },
+      { geo: new THREE.ConeGeometry(0.12, 0.32, 6, 1), dist: 1.5, speed: 0.62, phase: 4.8, incl: 0.95, node: 4.4, label: 'spotlight' },
       /* Shield — trust & security */
-      { geo: (() => { const sh = new THREE.Shape(); const w=0.16,h=0.22; sh.moveTo(0,h); sh.bezierCurveTo(w,h,w,h*0.3,0,-h*0.3); sh.bezierCurveTo(-w,h*0.3,-w,h,0,h); return new THREE.ExtrudeGeometry(sh,{depth:0.06,bevelEnabled:true,bevelThickness:0.015,bevelSize:0.015}); })(), dist: 1.75, speed: 0.52, phase: 5.9, label: 'shield' },
+      { geo: (() => { const sh = new THREE.Shape(); const w=0.16,h=0.22; sh.moveTo(0,h); sh.bezierCurveTo(w,h,w,h*0.3,0,-h*0.3); sh.bezierCurveTo(-w,h*0.3,-w,h,0,h); return new THREE.ExtrudeGeometry(sh,{depth:0.06,bevelEnabled:true,bevelThickness:0.015,bevelSize:0.015}); })(), dist: 1.75, speed: 0.52, phase: 5.9, incl: -0.7, node: 5.5, label: 'shield' },
     ];
 
     orbitItems.forEach((item, i) => {
@@ -785,7 +724,11 @@
         emissive: emissives[i], emissiveIntensity: 0.35
       });
       const mesh = new THREE.Mesh(item.geo, mat);
-      mesh.userData = { dist: item.dist, speed: item.speed, phase: item.phase, label: item.label, baseColor: colors[i], baseEmissive: emissives[i] };
+      mesh.userData = {
+        dist: item.dist, speed: item.speed, phase: item.phase,
+        incl: item.incl, node: item.node, label: item.label,
+        baseColor: colors[i], baseEmissive: emissives[i]
+      };
       orbitGroup.add(mesh);
     });
 
@@ -846,22 +789,30 @@
       currentRotY += (targetRotY - currentRotY) * 0.08;
       currentRotX += (targetRotX - currentRotX) * 0.08;
 
-      /* Coin spin */
-      coin.rotation.z += 0.003 + snap * 0.025;
-      ring.rotation.z += 0.003 + snap * 0.025;
-      coinGroup.rotation.y = currentRotY * 0.3;
+      /* Coin flip: rotate coinGroup around Y so both logo faces alternate
+         toward the camera. The rim ring rides along as a child. */
+      coinGroup.rotation.y += 0.004 + snap * 0.03;
+      coinGroup.rotation.x = currentRotX;
       coin.material.emissiveIntensity = 0.4 + snap * 0.7;
       ring.material.emissiveIntensity = 0.6 + snap * 0.5;
       coin.scale.setScalar(1 + snap * 0.12);
       ring.scale.setScalar(1 + snap * 0.12);
 
-      /* Orbiting objects */
+      /* Orbiting objects on 3D-inclined planes */
       orbitGroup.children.forEach((m, i) => {
         const ud = m.userData;
         const angle = t * 0.001 * ud.speed + ud.phase;
-        const x = Math.cos(angle) * ud.dist;
-        const z = Math.sin(angle) * ud.dist;
-        m.position.set(x + bounce * 0.4 * Math.sin(t*0.001+i), bounce * 0.3 * Math.cos(t*0.001+i), z);
+        /* point on the XZ equator, then tilt by incl and rotate by node */
+        const bx = Math.cos(angle) * ud.dist;
+        const by = 0;
+        const bz = Math.sin(angle) * ud.dist;
+        /* incl tilt around X */
+        const ty = by * Math.cos(ud.incl) - bz * Math.sin(ud.incl);
+        const tz = by * Math.sin(ud.incl) + bz * Math.cos(ud.incl);
+        /* node rotation around Y */
+        const nx = bx * Math.cos(ud.node) - tz * Math.sin(ud.node);
+        const nz = bx * Math.sin(ud.node) + tz * Math.cos(ud.node);
+        m.position.set(nx + bounce * 0.4 * Math.sin(t*0.001+i), ty + bounce * 0.3 * Math.cos(t*0.001+i), nz);
         m.rotation.x += 0.01 + snap * 0.02;
         m.rotation.y += 0.015 + snap * 0.025;
         m.material.emissiveIntensity = 0.35 + snap * 0.5;
