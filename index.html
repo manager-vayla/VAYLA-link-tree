@@ -85,17 +85,10 @@
     a { color: inherit; text-decoration: none; }
 
     .skip-link {
-      position: absolute;
-      left: 1rem; top: -100px;
-      z-index: 1000;
-      padding: 0.6rem 1rem;
-      background: var(--ink);
-      color: var(--bg);
-      border-radius: 8px;
-      font-family: var(--mono);
-      font-size: 0.8rem;
-      letter-spacing: 0.08em;
-      transition: top 0.2s ease;
+      position: absolute; left: 1rem; top: -100px; z-index: 1000;
+      padding: 0.6rem 1rem; background: var(--ink); color: var(--bg);
+      border-radius: 8px; font-family: var(--mono); font-size: 0.8rem;
+      letter-spacing: 0.08em; transition: top 0.2s ease;
     }
     .skip-link:focus { top: 1rem; outline: 2px solid var(--magenta); outline-offset: 2px; }
 
@@ -130,13 +123,15 @@
     /* ═══ HERO ═══ */
     .hero {
       display: grid;
-      grid-template-columns: auto 1fr;
+      grid-template-columns: auto 1fr 220px;
       align-items: center;
-      gap: clamp(1rem, 3vw, 2.25rem);
+      gap: clamp(1rem, 3vw, 2rem);
       padding-bottom: 1.2rem;
       margin-bottom: 1.2rem;
       border-bottom: 1px solid var(--line);
     }
+
+    .hero-in { display: flex; align-items: center; gap: clamp(1rem, 3vw, 2rem); }
     .avatar-ring { position: relative; flex-shrink: 0; }
     .avatar-ring::before, .avatar-ring::after {
       content: ''; position: absolute; border-radius: 50%; pointer-events: none;
@@ -164,29 +159,64 @@
     }
     .hero-eyebrow::before { content: ''; width: 22px; height: 1px; background: var(--cyan); }
     .hero-name {
-      font-size: clamp(2.6rem, 8vw, 4.4rem); font-weight: 800;
+      font-size: clamp(2.4rem, 7vw, 3.8rem); font-weight: 800;
       letter-spacing: -0.045em; line-height: 0.95;
       background: linear-gradient(135deg, var(--ink) 0%, var(--ink) 50%, var(--cyan) 80%, var(--red) 100%);
       -webkit-background-clip: text; background-clip: text; color: transparent;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.4rem;
     }
     .hero-desc {
-      font-family: var(--mono); font-size: 0.85rem; color: var(--ink-dim);
-      max-width: 56ch; letter-spacing: 0.01em;
+      font-family: var(--mono); font-size: 0.82rem; color: var(--ink-dim);
+      max-width: 48ch; letter-spacing: 0.01em;
     }
     .hero-desc b { color: var(--ink); font-weight: 500; }
 
     .hero-credit {
-      grid-column: 1 / -1;
-      font-family: var(--mono); font-size: 0.68rem;
+      font-family: var(--mono); font-size: 0.64rem;
       color: var(--cyan); letter-spacing: 0.08em;
-      animation: breathe-neon 2.6s ease-in-out infinite;
-      opacity: 0.9;
-      margin-top: 0.3rem;
+      animation: breathe-neon 2.6s ease-in-out infinite; opacity: 0.9;
+      margin-top: 0.5rem;
+      grid-column: 1 / -1;
     }
     @keyframes breathe-neon {
       0%, 100% { text-shadow: 0 0 4px rgba(32,230,230,0.4), 0 0 8px rgba(32,230,230,0.2); opacity: 0.7; }
       50%      { text-shadow: 0 0 10px rgba(32,230,230,0.8), 0 0 24px rgba(32,230,230,0.4), 0 0 40px rgba(32,230,230,0.15); opacity: 1; }
+    }
+
+    /* LinkedIn mini-card in hero */
+    .hero-in-card {
+      min-width: 0;
+      border: 1px solid var(--line); border-radius: var(--r-card);
+      overflow: hidden; transition: border-color 0.3s, transform 0.3s;
+      background: var(--card);
+    }
+    @media (hover: hover) {
+      .hero-in-card:hover { border-color: var(--line-accent); transform: translateY(-2px); }
+    }
+    .hero-in-card .hic-visual {
+      height: 72px; background: var(--bg-2);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .hero-in-card .hic-visual span {
+      width: 100%; height: 100%;
+      background-size: 45% auto;
+      background-repeat: no-repeat;
+      background-position: center;
+      opacity: 0.85;
+    }
+    .hero-in-card .hic-body {
+      padding: 0.55rem 0.8rem;
+    }
+    .hero-in-card .hic-body .hic-title {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: -0.01em; color: var(--ink);
+    }
+    .hero-in-card .hic-body .hic-sub {
+      font-family: var(--mono); font-size: 0.56rem; color: var(--ink-mute); letter-spacing: 0.04em; margin-top: 0.1rem;
+    }
+    .hero-in-card .hic-tag {
+      font-family: var(--mono); font-size: 0.54rem; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--cyan);
+      padding: 0.3rem 0.8rem 0.5rem;
     }
 
     /* ═══ MARQUEE ═══ */
@@ -215,6 +245,7 @@
       display: flex; align-items: baseline; gap: 1rem;
       margin-bottom: 1.1rem; margin-top: 2.5rem;
     }
+    .sec-head:first-of-type { margin-top: 0; }
     .sec-head h2 {
       font-family: var(--mono); font-size: 0.78rem; font-weight: 500;
       letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-dim);
@@ -226,7 +257,7 @@
     /* ═══ 3D DIVIDER STRIP ═══ */
     .divider3d {
       position: relative;
-      height: 140px;
+      height: 160px;
       margin-bottom: 2.5rem;
       border-top: 1px solid var(--line);
       border-bottom: 1px solid var(--line);
@@ -235,9 +266,7 @@
     }
     .divider3d canvas { width: 100%; height: 100%; display: block; cursor: grab; }
     .divider3d canvas:active { cursor: grabbing; }
-    @media (max-width: 600px) {
-      .divider3d { height: 100px; }
-    }
+    @media (max-width: 600px) { .divider3d { height: 100px; } }
 
     /* ═══ CARDS ═══ */
     .card {
@@ -324,45 +353,8 @@
       gap: 0.85rem;
       margin-bottom: 0.85rem;
     }
-    @media (max-width: 820px) {
-      .card-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 600px) {
-      .card-grid { grid-template-columns: 1fr; }
-    }
-
-    /* ═══ ROW CARDS ═══ */
-    .row-card {
-      position: relative; display: flex; align-items: center; gap: 0;
-      background: var(--card); border: 1px solid var(--line);
-      border-radius: var(--r-card); color: var(--ink);
-      margin-top: 0.85rem; overflow: hidden; isolation: isolate;
-      transition: background 0.3s, border-color 0.3s, transform 0.3s cubic-bezier(0.16,1,0.3,1);
-    }
-    .row-visual {
-      flex: 0 0 80px; height: 80px; display: flex; align-items: center; justify-content: center;
-      background: var(--bg-2); position: relative; overflow: hidden;
-    }
-    .row-visual .bg-img {
-      position: absolute; inset: 0; background-size: contain;
-      background-repeat: no-repeat; background-position: center;
-      transition: transform 0.5s ease;
-    }
-    @media (hover: hover) {
-      .row-card:hover .row-visual .bg-img { transform: scale(1.1); }
-      .row-card:hover { border-color: var(--line-accent); transform: translateX(2px); }
-    }
-    .row-card:focus-visible { outline: 2px solid var(--magenta); outline-offset: 4px; }
-    .row-body {
-      flex: 1; padding: 0.85rem 1.1rem;
-      display: flex; align-items: center; gap: 1rem; min-width: 0;
-    }
-    @media (hover: hover) {
-      .row-card:hover .row-body { background: var(--card-hi); }
-    }
-    .row-text { flex: 1; min-width: 0; }
-    .row-title { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em; }
-    .row-sub { font-family: var(--mono); font-size: 0.72rem; color: var(--ink-dim); letter-spacing: 0.04em; margin-top: 0.12rem; }
+    @media (max-width: 820px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px) { .card-grid { grid-template-columns: 1fr; } }
 
     /* ═══ FOOTER ═══ */
     footer {
@@ -400,10 +392,8 @@
 
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important; scroll-behavior: auto !important;
       }
       .marquee-track { animation: none !important; }
       .avatar-ring::before, .avatar-ring::after { display: none; }
@@ -415,13 +405,15 @@
 
     @media (max-width: 600px) {
       .hero {
-        grid-template-columns: auto 1fr; align-items: center; gap: 0.75rem;
+        grid-template-columns: auto 1fr; align-items: start; gap: 0.6rem;
       }
-      .avatar { width: 64px; height: 64px; }
-      .hero-name { font-size: clamp(2rem, 12vw, 3rem); }
-      .hero-desc { font-size: 0.75rem; }
-      .hero-eyebrow { font-size: 0.68rem; }
-      .hero-credit { font-size: 0.62rem; margin-top: 0.2rem; }
+      .avatar { width: 54px; height: 54px; }
+      .hero-name { font-size: clamp(1.8rem, 12vw, 2.6rem); }
+      .hero-desc { font-size: 0.72rem; }
+      .hero-eyebrow { font-size: 0.65rem; }
+      .hero-credit { font-size: 0.58rem; margin-top: 0.2rem; }
+      .hero-in-card { display: none; }
+      .hero-in { gap: 0.6rem; }
       .page { padding: 1.5rem 1rem 3rem; }
       .card-visual { flex: 0 0 110px; }
       .card-meta { padding: 0.75rem 0.9rem; }
@@ -430,10 +422,12 @@
       .marquee-item { font-size: 0.95rem; gap: 0.8rem; }
       .marquee-track { gap: 1.8rem; }
       .card-grid { grid-template-columns: 1fr; }
-      .row-card { flex-direction: column; }
-      .row-visual { flex: 0 0 90px; width: 100%; }
       footer { flex-direction: column; align-items: flex-start; text-align: left; margin-top: 2.5rem; }
     }
+
+    /* Re-show LinkedIn as normal card on mobile (after Community section) */
+    .mob-linkedin { display: none; }
+    @media (max-width: 600px) { .mob-linkedin { display: block; } }
   </style>
   <script type="importmap">
     { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
@@ -449,20 +443,31 @@
 
 <main class="page" id="main">
 
-  <!-- ═══ HERO ═══ -->
   <header class="hero rise" style="animation-delay: 60ms;">
-    <div class="avatar-ring">
-      <img src="logo.jpg" alt="VAYLA logo" class="avatar" width="88" height="88"/>
+    <div class="hero-in">
+      <div class="avatar-ring">
+        <img src="logo.jpg" alt="VAYLA logo" class="avatar" width="88" height="88"/>
+      </div>
+      <div class="hero-info">
+        <p class="hero-eyebrow">Official · Web3 · K-Arena</p>
+        <h1 class="hero-name">VAYLA</h1>
+        <p class="hero-desc"><b>Music meets Web3.</b> Official channels, arena, quests and drops for the VAYLA ecosystem.</p>
+      </div>
     </div>
-    <div class="hero-info">
-      <p class="hero-eyebrow">Official · Web3 · K-Arena</p>
-      <h1 class="hero-name">VAYLA</h1>
-      <p class="hero-desc"><b>Music meets Web3.</b> Official channels, arena, quests and drops for the VAYLA ecosystem.</p>
-    </div>
+
+    <a class="hero-in-card" href="https://www.linkedin.com/company/vaylatechnology/" target="_blank" rel="noopener noreferrer">
+      <div class="hic-visual">
+        <span style="background-image:url('https://www.google.com/s2/favicons?domain=linkedin.com&sz=128');"></span>
+      </div>
+      <div class="hic-body">
+        <div class="hic-title">LinkedIn</div>
+        <div class="hic-sub">VAYLA Technology</div>
+      </div>
+      <div class="hic-tag">Business</div>
+    </a>
     <p class="hero-credit">Created by Pham Thanh Binh · binhpt310@vayla.io / theshield310@gmail.com</p>
   </header>
 
-  <!-- ═══ KINETIC MARQUEE ═══ -->
   <div class="marquee" aria-hidden="true">
     <div class="marquee-track">
       <span class="marquee-item">Official Channels <span class="sep"></span></span>
@@ -482,14 +487,12 @@
     </div>
   </div>
 
-  <!-- ═══ ECOSYSTEM ═══ -->
-  <div class="sec-head rise" style="animation-delay: 200ms; margin-top: 0;">
+  <div class="sec-head rise" style="animation-delay: 200ms;">
     <h2>Ecosystem</h2>
-    <span class="count">/ 05</span>
+    <span class="count">/ 06</span>
   </div>
 
   <div class="card-grid">
-    <!-- Official Website -->
     <a class="card rise" href="https://vayla.io/" target="_blank" rel="noopener noreferrer" style="animation-delay: 260ms;">
       <div class="card-visual">
         <span class="bg-img" style="background-image:url('images/vayla_logo_icon_new.jpg');background-size:75% auto;opacity:0.85;"></span>
@@ -501,9 +504,7 @@
         <div class="card-bot"><span class="arrow">Open <span>→</span></span></div>
       </div>
     </a>
-
-    <!-- Arena -->
-    <a class="card rise" href="https://vayla-arena.com/" target="_blank" rel="noopener noreferrer" style="animation-delay: 340ms;">
+    <a class="card rise" href="https://vayla-arena.com/" target="_blank" rel="noopener noreferrer" style="animation-delay: 320ms;">
       <div class="card-visual">
         <span class="bg-img" style="background-image:url('images/vayla_logo_icon_new.jpg');background-size:70% auto;opacity:0.80;"></span>
       </div>
@@ -514,9 +515,7 @@
         <div class="card-bot"><span class="arrow">Enter <span>→</span></span></div>
       </div>
     </a>
-
-    <!-- Whitepaper -->
-    <a class="card rise" href="(EN)_VAYLA_WHITEPAPER_v3.8.pdf" target="_blank" rel="noopener noreferrer" style="animation-delay: 420ms;">
+    <a class="card rise" href="(EN)_VAYLA_WHITEPAPER_v3.8.pdf" target="_blank" rel="noopener noreferrer" style="animation-delay: 380ms;">
       <div class="card-visual">
         <span class="bg-img" style="background-image:url('images/vayla_logo_icon_new.jpg');background-size:65% auto;opacity:0.75;"></span>
       </div>
@@ -527,9 +526,7 @@
         <div class="card-bot"><span class="arrow">Read <span>→</span></span></div>
       </div>
     </a>
-
-    <!-- CoinGecko -->
-    <a class="card rise" href="https://www.coingecko.com/en/coins/vayla-2" target="_blank" rel="noopener noreferrer" style="animation-delay: 500ms;">
+    <a class="card rise" href="https://www.coingecko.com/en/coins/vayla-2" target="_blank" rel="noopener noreferrer" style="animation-delay: 440ms;">
       <div class="card-visual">
         <span class="bg-img" style="background-image:url('https://www.google.com/s2/favicons?domain=coingecko.com&sz=128');background-size:55% auto;opacity:0.85;"></span>
       </div>
@@ -540,9 +537,7 @@
         <div class="card-bot"><span class="arrow">Track <span>→</span></span></div>
       </div>
     </a>
-
-    <!-- CoinMarketCap -->
-    <a class="card rise" href="https://coinmarketcap.com/currencies/vayla/" target="_blank" rel="noopener noreferrer" style="animation-delay: 580ms;">
+    <a class="card rise" href="https://coinmarketcap.com/currencies/vayla/" target="_blank" rel="noopener noreferrer" style="animation-delay: 500ms;">
       <div class="card-visual">
         <span class="bg-img" style="background-image:url('https://www.google.com/s2/favicons?domain=coinmarketcap.com&sz=128');background-size:55% auto;opacity:0.85;"></span>
       </div>
@@ -553,36 +548,30 @@
         <div class="card-bot"><span class="arrow">Open <span>→</span></span></div>
       </div>
     </a>
+    <a class="card rise" href="https://zealy.io/cw/vayla" target="_blank" rel="noopener noreferrer" style="animation-delay: 560ms;">
+      <div class="card-visual">
+        <span class="bg-img" style="background-image:url('https://www.google.com/s2/favicons?domain=zealy.io&sz=128');background-size:55% auto;opacity:0.85;"></span>
+      </div>
+      <div class="card-meta">
+        <span class="chip">Quests · 06</span>
+        <div class="card-title">Zealy Quests</div>
+        <div class="card-sub">Earn rewards &amp; early access</div>
+        <div class="card-bot"><span class="arrow">Start <span>→</span></span></div>
+      </div>
+    </a>
   </div>
 
-  <!-- Quests row -->
-  <a class="row-card rise" href="https://zealy.io/cw/vayla" target="_blank" rel="noopener noreferrer" style="animation-delay: 660ms;">
-    <div class="row-visual">
-      <span class="bg-img" style="background-image:url('https://www.google.com/s2/favicons?domain=zealy.io&sz=128');background-size:55% auto;opacity:0.85;"></span>
-    </div>
-    <div class="row-body">
-      <div class="row-text">
-        <div class="row-title">Zealy · Quests &amp; Drops</div>
-        <div class="row-sub">Earn rewards, complete quests, unlock early access</div>
-      </div>
-      <span class="chip">Quests</span>
-    </div>
-  </a>
-
-  <!-- ═══ 3D DIVIDER ═══ -->
   <div class="divider3d" id="divider3d-1" aria-hidden="true">
     <canvas id="d3d-canvas-1"></canvas>
   </div>
 
-  <!-- ═══ COMMUNITY ═══ -->
-  <div class="sec-head rise" style="margin-top: 0; animation-delay: 740ms;">
+  <div class="sec-head rise" style="margin-top: 0; animation-delay: 700ms;">
     <h2>Community</h2>
     <span class="count">/ 03</span>
   </div>
 
   <div class="card-grid">
-    <!-- X -->
-    <a class="card rise" href="https://x.com/VAYLAOfficial_" target="_blank" rel="noopener noreferrer" style="animation-delay: 800ms;">
+    <a class="card rise" href="https://x.com/VAYLAOfficial_" target="_blank" rel="noopener noreferrer" style="animation-delay: 760ms;">
       <div class="card-visual">
         <span class="bg-img" style="background-image:url('https://www.google.com/s2/favicons?domain=x.com&sz=128');background-size:55% auto;opacity:0.85;"></span>
       </div>
@@ -593,9 +582,7 @@
         <div class="card-bot"><span class="arrow">Follow <span>→</span></span></div>
       </div>
     </a>
-
-    <!-- Telegram -->
-    <a class="card rise" href="https://t.me/Vayla_Vaylian" target="_blank" rel="noopener noreferrer" style="animation-delay: 880ms;">
+    <a class="card rise" href="https://t.me/Vayla_Vaylian" target="_blank" rel="noopener noreferrer" style="animation-delay: 820ms;">
       <div class="card-visual">
         <span class="bg-img" style="background-image:url('https://www.google.com/s2/favicons?domain=t.me&sz=128');background-size:55% auto;opacity:0.85;"></span>
       </div>
@@ -606,9 +593,7 @@
         <div class="card-bot"><span class="arrow">Join <span>→</span></span></div>
       </div>
     </a>
-
-    <!-- Discord -->
-    <a class="card rise" href="https://discord.gg/gM8EfBH6Vu" target="_blank" rel="noopener noreferrer" style="animation-delay: 960ms;">
+    <a class="card rise" href="https://discord.gg/gM8EfBH6Vu" target="_blank" rel="noopener noreferrer" style="animation-delay: 880ms;">
       <div class="card-visual">
         <span class="bg-img" style="background-image:url('https://www.google.com/s2/favicons?domain=discord.com&sz=128');background-size:55% auto;opacity:0.85;"></span>
       </div>
@@ -621,26 +606,20 @@
     </a>
   </div>
 
-  <!-- ═══ 3D DIVIDER 2 ═══ -->
-  <div class="divider3d" id="divider3d-2" aria-hidden="true">
-    <canvas id="d3d-canvas-2"></canvas>
-  </div>
-
-  <!-- LinkedIn row -->
-  <a class="row-card rise" href="https://www.linkedin.com/company/vaylatechnology/" target="_blank" rel="noopener noreferrer" style="animation-delay: 1040ms;">
-    <div class="row-visual">
+  <!-- LinkedIn card for mobile (hidden on desktop, hero-in-card instead) -->
+  <a class="card mob-linkedin" href="https://www.linkedin.com/company/vaylatechnology/" target="_blank" rel="noopener noreferrer" style="margin-top:0.85rem;">
+    <div class="card-visual">
       <span class="bg-img" style="background-image:url('https://www.google.com/s2/favicons?domain=linkedin.com&sz=128');background-size:55% auto;opacity:0.85;"></span>
     </div>
-    <div class="row-body">
-      <div class="row-text">
-        <div class="row-title">LinkedIn · VAYLA Technology</div>
-        <div class="row-sub">Official company page</div>
-      </div>
+    <div class="card-meta">
       <span class="chip" style="color:var(--cyan);border-color:rgba(32,230,230,0.4);">Business</span>
+      <div class="card-title">LinkedIn · VAYLA Technology</div>
+      <div class="card-sub">Official company page</div>
+      <div class="card-bot"><span class="arrow">Connect <span>→</span></span></div>
     </div>
   </a>
 
-  <footer class="rise" style="animation-delay: 1120ms;">
+  <footer class="rise" style="animation-delay: 940ms;">
     <span class="foot-l">© 2026 VAYLA · All rights reserved</span>
     <span class="foot-r"><span class="dot"></span>Built for the Vaylian community</span>
   </footer>
@@ -650,23 +629,16 @@
 (function () {
   'use strict';
 
-  /* ═══ Canvas particle background ═══ */
   const canvas = document.getElementById('canvas-bg');
   const ctx = canvas.getContext('2d');
   let W, H, dots = [];
   let mouse = { x: -9999, y: -9999 };
-  let running = true;
-  let rafId = null;
+  let running = true; let rafId = null;
   const SPACING = 42, BASE_R = 1.1, RAD = 170, BOOST = 0.6;
 
-  function size() {
-    W = canvas.width = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-    build();
-  }
+  function size() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; build(); }
   function build() {
-    const cols = Math.ceil(W / SPACING) + 2;
-    const rows = Math.ceil(H / SPACING) + 2;
+    const cols = Math.ceil(W / SPACING) + 2, rows = Math.ceil(H / SPACING) + 2;
     dots = [];
     for (let r = 0; r < rows; r++)
       for (let c = 0; c < cols; c++)
@@ -676,31 +648,19 @@
     if (!running) return;
     ctx.clearRect(0, 0, W, H);
     const t1 = t * 0.0003;
-    const b1 = ctx.createRadialGradient(
-      W * 0.18 + Math.sin(t1) * 80, H * 0.12 + Math.cos(t1 * 0.7) * 60, 0,
-      W * 0.18 + Math.sin(t1) * 80, H * 0.12 + Math.cos(t1 * 0.7) * 60, 460
-    );
-    b1.addColorStop(0, 'rgba(32, 230, 230, 0.10)'); b1.addColorStop(1, 'transparent');
+    const b1 = ctx.createRadialGradient(W*0.18+Math.sin(t1)*80, H*0.12+Math.cos(t1*0.7)*60, 0, W*0.18+Math.sin(t1)*80, H*0.12+Math.cos(t1*0.7)*60, 460);
+    b1.addColorStop(0, 'rgba(32,230,230,0.10)'); b1.addColorStop(1, 'transparent');
     ctx.fillStyle = b1; ctx.fillRect(0, 0, W, H);
-
-    const b2 = ctx.createRadialGradient(
-      W * 0.82 + Math.cos(t1 * 0.8) * 70, H * 0.82 + Math.sin(t1 * 0.6) * 80, 0,
-      W * 0.82 + Math.cos(t1 * 0.8) * 70, H * 0.82 + Math.sin(t1 * 0.6) * 80, 420
-    );
-    b2.addColorStop(0, 'rgba(255, 64, 84, 0.06)'); b2.addColorStop(1, 'transparent');
+    const b2 = ctx.createRadialGradient(W*0.82+Math.cos(t1*0.8)*70, H*0.82+Math.sin(t1*0.6)*80, 0, W*0.82+Math.cos(t1*0.8)*70, H*0.82+Math.sin(t1*0.6)*80, 420);
+    b2.addColorStop(0, 'rgba(255,64,84,0.06)'); b2.addColorStop(1, 'transparent');
     ctx.fillStyle = b2; ctx.fillRect(0, 0, W, H);
-
     for (let i = 0; i < dots.length; i++) {
       const d = dots[i];
-      const ox = d.x + Math.cos(t * 0.0006 + d.phase) * 1.1;
-      const oy = d.y + Math.sin(t * 0.0008 + d.phase) * 1.5;
-      const dx = ox - mouse.x, dy = oy - mouse.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      const prox = Math.max(0, 1 - dist / RAD);
-      const r = BASE_R + prox * 1.5;
-      const a = (0.18 + prox * BOOST) * 0.55;
-      ctx.beginPath(); ctx.arc(ox, oy, r, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(245,239,230,' + a + ')'; ctx.fill();
+      const ox = d.x + Math.cos(t*0.0006+d.phase)*1.1, oy = d.y + Math.sin(t*0.0008+d.phase)*1.5;
+      const dx = ox-mouse.x, dy = oy-mouse.y, dist = Math.sqrt(dx*dx+dy*dy);
+      const prox = Math.max(0, 1-dist/RAD), r = BASE_R+prox*1.5, a = (0.18+prox*BOOST)*0.55;
+      ctx.beginPath(); ctx.arc(ox, oy, r, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(245,239,230,'+a+')'; ctx.fill();
     }
     rafId = requestAnimationFrame(frame);
   }
@@ -713,7 +673,6 @@
   document.addEventListener('visibilitychange', () => { document.hidden ? stop() : start(); });
   size(); frame(0);
 
-  /* ═══ Scroll progress ═══ */
   const prog = document.querySelector('#progress > i');
   let scrollTicking = false;
   window.addEventListener('scroll', () => {
@@ -722,125 +681,204 @@
     requestAnimationFrame(() => {
       const s = document.documentElement.scrollTop;
       const m = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-      prog.style.height = (m > 0 ? (s / m) * 100 : 0) + '%';
+      prog.style.height = (m > 0 ? (s/m)*100 : 0) + '%';
       scrollTicking = false;
     });
   }, { passive: true });
 
-  /* ═══ 3D DIVIDERS ═══ */
+  /* ═══ 3D DIVIDER: VAYLA Token Coin + Orbiting Concepts ═══ */
   (async function init3D() {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     try {
       const THREE = await import('three');
-      initDivider3D('d3d-canvas-1', THREE, ['torus', 'octa', 'cone', 'torus', 'octa', 'cone']);
-      initDivider3D('d3d-canvas-2', THREE, ['v', 'icosa', 'sphere', 'v', 'icosa', 'sphere']);
-    } catch(e) { /* three.js not available */ }
+      initCoinDivider('d3d-canvas-1', THREE);
+    } catch(e) {}
   })();
 
-  function initDivider3D(canvasId, THREE, types) {
+  function initCoinDivider(canvasId, THREE) {
     const cvs = document.getElementById(canvasId);
     if (!cvs) return;
+    const container = cvs.parentElement;
     const scene = new THREE.Scene();
     const renderer = new THREE.WebGLRenderer({ canvas: cvs, alpha: true, antialias: true });
-    const container = cvs.parentElement;
-    let W2 = container.clientWidth, H2 = container.clientHeight;
-    renderer.setSize(W2, H2, false);
+    let DW = container.clientWidth, DH = container.clientHeight;
+    renderer.setSize(DW, DH, false);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    const camera = new THREE.PerspectiveCamera(45, W2 / Math.max(H2, 1), 0.1, 100);
-    camera.position.set(0, 0, 8);
+    const camera = new THREE.PerspectiveCamera(40, DW/Math.max(DH,1), 0.1, 100);
+    camera.position.set(0, 0.2, 7);
 
-    const ambient = new THREE.AmbientLight(0x20E6E6, 0.3);
+    const ambient = new THREE.AmbientLight(0x20E6E6, 0.25);
     scene.add(ambient);
-    const light1 = new THREE.DirectionalLight(0x20E6E6, 0.8);
-    light1.position.set(5, 3, 5); scene.add(light1);
-    const light2 = new THREE.DirectionalLight(0xFF4054, 0.4);
-    light2.position.set(-4, -2, 3); scene.add(light2);
+    const keyLight = new THREE.DirectionalLight(0x20E6E6, 0.9);
+    keyLight.position.set(4, 3, 5); scene.add(keyLight);
+    const rimLight = new THREE.DirectionalLight(0xFF4054, 0.35);
+    rimLight.position.set(-4, -2, 2); scene.add(rimLight);
+    const fillLight = new THREE.DirectionalLight(0x228F96, 0.3);
+    fillLight.position.set(0, -3, 1); scene.add(fillLight);
 
-    const group = new THREE.Group();
-    const count = types.length;
-    const spacing = 3.6;
-    const baseX = -(spacing * (count - 1)) / 2;
-    const meshes = [];
+    const coinGroup = new THREE.Group();
+    scene.add(coinGroup);
 
-    types.forEach((type, i) => {
-      let geo;
-      switch(type) {
-        case 'torus': geo = new THREE.TorusGeometry(0.35, 0.14, 16, 32); break;
-        case 'octa': geo = new THREE.OctahedronGeometry(0.38, 0); break;
-        case 'cone': geo = new THREE.ConeGeometry(0.33, 0.7, 6, 1); break;
-        case 'icosa': geo = new THREE.IcosahedronGeometry(0.36, 0); break;
-        case 'sphere': geo = new THREE.SphereGeometry(0.35, 24, 24); break;
-        case 'v': {
-          const shape = new THREE.Shape();
-          shape.moveTo(0, 0.45); shape.lineTo(0.28, -0.35);
-          shape.lineTo(0.1, -0.35); shape.lineTo(0, 0.05);
-          shape.lineTo(-0.1, -0.35); shape.lineTo(-0.28, -0.35);
-          shape.closePath();
-          geo = new THREE.ExtrudeGeometry(shape, { depth: 0.15, bevelEnabled: true, bevelThickness: 0.04, bevelSize: 0.04 });
-          break;
-        }
-        default: geo = new THREE.BoxGeometry(0.45, 0.45, 0.45); break;
-      }
-      const isV = type === 'v';
-      const mat = new THREE.MeshStandardMaterial({
-        color: i % 2 === 0 ? 0x20E6E6 : 0x228F96,
-        metalness: 0.3, roughness: 0.4,
-        emissive: i % 2 === 0 ? 0x20E6E6 : 0x228F96,
-        emissiveIntensity: 0.3
-      });
-      const mesh = new THREE.Mesh(geo, mat);
-      mesh.position.x = baseX + i * spacing;
-      mesh.userData = { baseX: mesh.position.x, rotSpeed: 0, isV };
-      group.add(mesh);
-      meshes.push(mesh);
+    /* ── VAYLA Token Coin ── */
+    const coinGeo = new THREE.CylinderGeometry(0.65, 0.65, 0.15, 64);
+    const coinMat = new THREE.MeshStandardMaterial({
+      color: 0x20E6E6, metalness: 0.7, roughness: 0.25,
+      emissive: 0x113355, emissiveIntensity: 0.4
     });
-    scene.add(group);
+    const coin = new THREE.Mesh(coinGeo, coinMat);
+    coin.rotation.x = Math.PI * 0.5;
+    coinGroup.add(coin);
 
+    /* Edge ring */
+    const ringGeo = new THREE.TorusGeometry(0.67, 0.04, 16, 64);
+    const ringMat = new THREE.MeshStandardMaterial({
+      color: 0x20E6E6, metalness: 0.9, roughness: 0.1,
+      emissive: 0x20E6E6, emissiveIntensity: 0.6
+    });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.rotation.x = Math.PI * 0.5;
+    coinGroup.add(ring);
+
+    /* VAYLA logo on coin face using canvas texture */
+    const faceCanvas = document.createElement('canvas');
+    faceCanvas.width = 256; faceCanvas.height = 256;
+    const fctx = faceCanvas.getContext('2d');
+    fctx.fillStyle = '#0D1111'; fctx.fillRect(0, 0, 256, 256);
+    fctx.fillStyle = '#20E6E6';
+    fctx.font = 'bold 72px Geist, sans-serif';
+    fctx.textAlign = 'center'; fctx.textBaseline = 'middle';
+    fctx.fillText('■', 128, 88);
+    fctx.font = 'bold 60px Geist, sans-serif';
+    fctx.fillText('VAYLA', 128, 148);
+    const faceTex = new THREE.CanvasTexture(faceCanvas);
+    faceTex.colorSpace = THREE.SRGBColorSpace;
+
+    const logoPlane1 = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.1, 1.1),
+      new THREE.MeshBasicMaterial({ map: faceTex, transparent: true, opacity: 0.9, depthWrite: false })
+    );
+    logoPlane1.position.y = 0.076;
+    coinGroup.add(logoPlane1);
+    const logoPlane2 = logoPlane1.clone();
+    logoPlane2.position.y = -0.076;
+    logoPlane2.rotation.y = Math.PI;
+    coinGroup.add(logoPlane2);
+
+    /* ── Orbiting Concept Objects ── */
+    const orbitGroup = new THREE.Group();
+    scene.add(orbitGroup);
+
+    const orbitItems = [
+      { geo: new THREE.TorusGeometry(0.14, 0.055, 8, 16), dist: 1.55, speed: 0.7, phase: 0, tilt: 0.35 },
+      { geo: new THREE.IcosahedronGeometry(0.21, 1), dist: 1.9, speed: 0.45, phase: 1.2, tilt: -0.5 },
+      { geo: new THREE.OctahedronGeometry(0.2, 0), dist: 1.55, speed: 0.65, phase: 2.4, tilt: 0.15 },
+      { geo: new THREE.ConeGeometry(0.14, 0.35, 5, 1), dist: 1.75, speed: 0.55, phase: 3.6, tilt: -0.3 },
+      { geo: new THREE.BoxGeometry(0.22, 0.22, 0.22), dist: 2.05, speed: 0.35, phase: 4.8, tilt: 0.6 },
+      { geo: new THREE.SphereGeometry(0.16, 16, 16), dist: 1.65, speed: 0.6, phase: 5.9, tilt: -0.45 },
+    ];
+
+    orbitItems.forEach((item, i) => {
+      const mat = new THREE.MeshStandardMaterial({
+        color: i % 3 === 0 ? 0x20E6E6 : (i % 3 === 1 ? 0x228F96 : 0x52BCB9),
+        metalness: 0.35, roughness: 0.45,
+        emissive: i % 3 === 0 ? 0x20E6E6 : (i % 3 === 1 ? 0x228F96 : 0x52BCB9),
+        emissiveIntensity: 0.35
+      });
+      const mesh = new THREE.Mesh(item.geo, mat);
+      mesh.userData = { dist: item.dist, speed: item.speed, phase: item.phase, tilt: item.tilt };
+      orbitGroup.add(mesh);
+    });
+
+    /* ── Dot cloud particles ── */
+    const particlesGeo = new THREE.BufferGeometry();
+    const pCount = 200;
+    const pPositions = new Float32Array(pCount * 3);
+    for (let i = 0; i < pCount; i++) {
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      const r = 1.2 + Math.random() * 2.5;
+      pPositions[i*3] = r * Math.sin(phi) * Math.cos(theta);
+      pPositions[i*3+1] = r * Math.cos(phi) * 0.6;
+      pPositions[i*3+2] = r * Math.sin(phi) * Math.sin(theta);
+    }
+    particlesGeo.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
+    const particlesMat = new THREE.PointsMaterial({
+      color: 0x20E6E6, size: 0.03, transparent: true, opacity: 0.5,
+      blending: THREE.AdditiveBlending, depthWrite: false
+    });
+    const particles = new THREE.Points(particlesGeo, particlesMat);
+    scene.add(particles);
+
+    /* ── Interaction ── */
     let targetRotY = 0, currentRotY = 0;
-    let isDragging = false, prevX = 0;
+    let targetRotX = 0.3, currentRotX = 0.3;
+    let isDragging = false, prevX = 0, prevY = 0;
 
-    cvs.addEventListener('pointerdown', e => { isDragging = true; prevX = e.clientX; cvs.style.cursor = 'grabbing'; });
+    cvs.addEventListener('pointerdown', e => { isDragging = true; prevX = e.clientX; prevY = e.clientY; cvs.style.cursor = 'grabbing'; });
     window.addEventListener('pointerup', () => { isDragging = false; cvs.style.cursor = 'grab'; });
     window.addEventListener('pointermove', e => {
       if (!isDragging) return;
-      targetRotY += (e.clientX - prevX) * 0.01;
-      prevX = e.clientX;
+      targetRotY += (e.clientX - prevX) * 0.008;
+      targetRotX += (e.clientY - prevY) * 0.006;
+      targetRotX = Math.max(-0.8, Math.min(1.2, targetRotX));
+      prevX = e.clientX; prevY = e.clientY;
     });
 
     const sectionRect = () => container.getBoundingClientRect();
+
     function tick(t) {
       requestAnimationFrame(tick);
-      W2 = container.clientWidth; H2 = container.clientHeight;
-      renderer.setSize(W2, H2, false);
-      camera.aspect = W2 / Math.max(H2, 1); camera.updateProjectionMatrix();
+      DW = container.clientWidth; DH = container.clientHeight;
+      renderer.setSize(DW, DH, false);
+      camera.aspect = DW/Math.max(DH,1); camera.updateProjectionMatrix();
 
       const srect = sectionRect();
-      const scenter = srect.top + srect.height / 2;
-      const vy = window.innerHeight / 2;
+      const scenter = srect.top + srect.height/2;
+      const vy = window.innerHeight/2;
       const dist = Math.abs(scenter - vy);
-      const snap = Math.max(0, Math.min((vy * 0.8 - dist) / (vy * 0.8), 1));
+      const snap = Math.max(0, Math.min((vy*0.8 - dist)/(vy*0.8), 1));
       const bounce = 1 - snap;
 
       if (!isDragging) {
-        targetRotY += (0 - targetRotY) * 0.05;
+        targetRotY += (0 - targetRotY) * 0.03;
+        targetRotX += (0.3 - targetRotX) * 0.03;
       }
-      currentRotY += (targetRotY - currentRotY) * 0.1;
-      group.rotation.y = currentRotY;
+      currentRotY += (targetRotY - currentRotY) * 0.08;
+      currentRotX += (targetRotX - currentRotX) * 0.08;
 
-      meshes.forEach((m, i) => {
-        const offset = (i % 2 === 0 ? 1 : -1) * bounce * 0.8;
-        m.position.x = m.userData.baseX + offset * count * 0.25;
-        m.rotation.y = currentRotY + bounce * Math.sin(t * 0.002 + i) * 0.6;
-        m.material.emissiveIntensity = 0.3 + snap * 0.5;
-        m.scale.setScalar(1 + snap * 0.15);
+      /* Coin spin */
+      coin.rotation.z += 0.003 + snap * 0.025;
+      ring.rotation.z += 0.003 + snap * 0.025;
+      coinGroup.rotation.y = currentRotY * 0.3;
+      coin.material.emissiveIntensity = 0.4 + snap * 0.7;
+      ring.material.emissiveIntensity = 0.6 + snap * 0.5;
+      coin.scale.setScalar(1 + snap * 0.12);
+      ring.scale.setScalar(1 + snap * 0.12);
+
+      /* Orbiting objects */
+      orbitGroup.children.forEach((m, i) => {
+        const ud = m.userData;
+        const angle = t * 0.001 * ud.speed + ud.phase;
+        const x = Math.cos(angle) * ud.dist;
+        const z = Math.sin(angle) * ud.dist;
+        m.position.set(x + bounce * 0.4 * Math.sin(t*0.001+i), bounce * 0.3 * Math.cos(t*0.001+i), z);
+        m.rotation.x += 0.01 + snap * 0.02;
+        m.rotation.y += 0.015 + snap * 0.025;
+        m.material.emissiveIntensity = 0.35 + snap * 0.5;
+        m.scale.setScalar(1 + snap * 0.18);
       });
+
+      orbitGroup.rotation.y = currentRotY;
+      particles.rotation.y = currentRotY * 0.4;
+      particles.rotation.x = currentRotX * 0.3;
+      particles.material.opacity = 0.5 + snap * 0.3;
 
       renderer.render(scene, camera);
     }
     tick(0);
 
-    new ResizeObserver(() => { W2 = container.clientWidth; H2 = container.clientHeight; renderer.setSize(W2, H2, false); }).observe(container);
+    new ResizeObserver(() => { DW = container.clientWidth; DH = container.clientHeight; renderer.setSize(DW, DH, false); }).observe(container);
   }
 })();
 </script>
