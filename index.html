@@ -658,19 +658,59 @@
     scene.add(spotLight);
     scene.add(spotLight.target);
 
-    /* ═══ VAYLA TOKEN COIN ═══ */
+    /* ═══ VAYLA TOKEN COIN (material-array pattern: side=rim, index-1&2=caps) ═══ */
     const coinGroup = new THREE.Group();
     scene.add(coinGroup);
 
     const COIN_R = 0.92, COIN_H = 0.16;
     const coinGeo = new THREE.CylinderGeometry(COIN_R, COIN_R, COIN_H, 80);
-    const coinMat = new THREE.MeshStandardMaterial({
+
+    /* Side material — metallic cyan rim */
+    const sideMat = new THREE.MeshStandardMaterial({
       color: 0x1a6e6e, metalness: 0.85, roughness: 0.22,
       emissive: 0x0a2a2a, emissiveIntensity: 0.5
     });
-    const coin = new THREE.Mesh(coinGeo, coinMat);
+
+    /* Cap materials start dark (texture maps in on load callback) */
+    const capMatBase = () => new THREE.MeshStandardMaterial({
+      map: null, color: 0x0d3d3d, metalness: 0.2, roughness: 0.55,
+      emissive: 0x050505, emissiveIntensity: 0.3
+    });
+    const capMat = capMatBase();
+    const capMatBack = capMatBase();
+
+    const coin = new THREE.Mesh(coinGeo, [sideMat, capMat, capMatBack]);
     coin.rotation.x = Math.PI * 0.5;
     coinGroup.add(coin);
+
+    /* Load logo texture onto both caps on ready */
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.load(
+      'logo.jpg',
+      (tex) => {
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+        tex.center.set(0.5, 0.5);
+        /* Back-cap clone so each cap owns its texture ref */
+        const texBack = tex.clone();
+        texBack.needsUpdate = true;
+        capMat.map = tex;
+        capMatBack.map = texBack;
+        capMat.color.set(0x0f3f3f);
+        capMatBack.color.set(0x0f3f3f);
+        capMat.needsUpdate = true;
+        capMatBack.needsUpdate = true;
+      },
+      undefined,
+      (err) => {
+        capMat.emissive.set(0x20E6E6);
+        capMatBack.emissive.set(0x20E6E6);
+        capMat.emissiveIntensity = 0.5;
+        capMatBack.emissiveIntensity = 0.5;
+        capMat.needsUpdate = true;
+        capMatBack.needsUpdate = true;
+      }
+    );
 
     /* Thick edge ring (coin rim detail) */
     const ringGeo = new THREE.TorusGeometry(COIN_R + 0.02, 0.05, 20, 80);
@@ -691,53 +731,6 @@
     const innerRing = new THREE.Mesh(innerRingGeo, innerRingMat);
     innerRing.rotation.x = Math.PI * 0.5;
     coinGroup.add(innerRing);
-
-    /* ═══ VAYLA LOGO ON BOTH COIN FACES ═══ */
-    /* Root-cause fix: the previous code placed planes at y=±0.076 but the
-       coin faces are along ±Z after rotation. Also used FrontSide so the
-       logo vanished for half the flip. Now planes sit exactly on the
-       cylinder caps (z = ±COIN_H/2), use DoubleSide so they are always
-       visible, and force texture+material refresh on async load. */
-    const textureLoader = new THREE.TextureLoader();
-    const logoMat = new THREE.MeshBasicMaterial({
-      map: null, transparent: true, opacity: 0.0, depthWrite: false, side: THREE.DoubleSide
-    });
-    const logoMatBack = new THREE.MeshBasicMaterial({
-      map: null, transparent: true, opacity: 0.0, depthWrite: false, side: THREE.DoubleSide
-    });
-
-    const logoPlane1 = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 1.3), logoMat);
-    logoPlane1.position.z = COIN_H/2 + 0.002;
-    coinGroup.add(logoPlane1);
-
-    const logoPlane2 = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 1.3), logoMatBack);
-    logoPlane2.position.z = -COIN_H/2 - 0.002;
-    logoPlane2.rotation.y = Math.PI;
-    coinGroup.add(logoPlane2);
-
-    textureLoader.load(
-      'logo.jpg',
-      (tex) => {
-        tex.colorSpace = THREE.SRGBColorSpace;
-        tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-        tex.needsUpdate = true;
-        logoMat.map = tex;
-        logoMatBack.map = tex;
-        logoMat.opacity = 1.0;
-        logoMatBack.opacity = 1.0;
-        logoMat.needsUpdate = true;
-        logoMatBack.needsUpdate = true;
-      },
-      undefined,
-      (err) => {
-        /* Fallback: cyan glow disc so faces are never blank */
-        const fallbackMat = new THREE.MeshBasicMaterial({
-          color: 0x20E6E6, transparent: true, opacity: 0.35, side: THREE.DoubleSide
-        });
-        logoPlane1.material = fallbackMat;
-        logoPlane2.material = fallbackMat.clone();
-      }
-    );
 
     /* ═══ CONCERT STAGE DECOR ═══ */
     /* Sweeping spotlight beams (volumetric cones) */
@@ -904,7 +897,7 @@
       /* Coin flip on Y to show both VAYLA faces */
       coinGroup.rotation.y += 0.005 + snap * 0.035;
       coinGroup.rotation.x = currentRotX;
-      coin.material.emissiveIntensity = 0.5 + snap * 0.6 + beat * 0.25;
+      coin.material[0].emissiveIntensity = 0.5 + snap * 0.6 + beat * 0.25;
       ring.material.emissiveIntensity = 0.7 + snap * 0.5 + beat * 0.3;
       innerRing.material.emissiveIntensity = 0.5 + snap * 0.4 + beat * 0.35;
       const pulseScale = 1 + snap * 0.12 + beat * 0.04;
