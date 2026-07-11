@@ -194,15 +194,17 @@
       .hero-in-card:hover { border-color: var(--line-accent); transform: translateY(-2px); }
     }
     .hero-in-card .hic-visual {
-      height: 72px; background: var(--bg-2);
+      height: 62px;
+      background: linear-gradient(135deg, rgba(10,102,194,0.3), rgba(10,102,194,0.08));
       display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
     }
-    .hero-in-card .hic-visual span {
-      width: 100%; height: 100%;
-      background-size: 45% auto;
-      background-repeat: no-repeat;
-      background-position: center;
-      opacity: 0.85;
+    .hero-in-card .hic-visual::after {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(circle at 70% 30%, rgba(10,102,194,0.25), transparent 70%);
+    }
+    .hero-in-card .hic-visual img {
+      width: 36px; height: 36px; object-fit: contain; position: relative; z-index: 1;
     }
     .hero-in-card .hic-body {
       padding: 0.55rem 0.8rem;
@@ -457,7 +459,7 @@
 
     <a class="hero-in-card" href="https://www.linkedin.com/company/vaylatechnology/" target="_blank" rel="noopener noreferrer">
       <div class="hic-visual">
-        <span style="background-image:url('https://www.google.com/s2/favicons?domain=linkedin.com&sz=128');"></span>
+        <img src="https://cdn.jsdelivr.net/npm/simple-icons@v14/icons/linkedin.svg" alt="LinkedIn" width="36" height="36" style="filter:invert(1);"/>
       </div>
       <div class="hic-body">
         <div class="hic-title">LinkedIn</div>
@@ -740,23 +742,14 @@
     ring.rotation.x = Math.PI * 0.5;
     coinGroup.add(ring);
 
-    /* VAYLA logo on coin face using canvas texture */
-    const faceCanvas = document.createElement('canvas');
-    faceCanvas.width = 256; faceCanvas.height = 256;
-    const fctx = faceCanvas.getContext('2d');
-    fctx.fillStyle = '#0D1111'; fctx.fillRect(0, 0, 256, 256);
-    fctx.fillStyle = '#20E6E6';
-    fctx.font = 'bold 72px Geist, sans-serif';
-    fctx.textAlign = 'center'; fctx.textBaseline = 'middle';
-    fctx.fillText('■', 128, 88);
-    fctx.font = 'bold 60px Geist, sans-serif';
-    fctx.fillText('VAYLA', 128, 148);
-    const faceTex = new THREE.CanvasTexture(faceCanvas);
-    faceTex.colorSpace = THREE.SRGBColorSpace;
+    /* VAYLA logo texture from real image */
+    const textureLoader = new THREE.TextureLoader();
+    const logoTexture = textureLoader.load('logo.jpg');
+    logoTexture.colorSpace = THREE.SRGBColorSpace;
 
     const logoPlane1 = new THREE.Mesh(
-      new THREE.PlaneGeometry(1.1, 1.1),
-      new THREE.MeshBasicMaterial({ map: faceTex, transparent: true, opacity: 0.9, depthWrite: false })
+      new THREE.PlaneGeometry(1.15, 1.15),
+      new THREE.MeshBasicMaterial({ map: logoTexture, transparent: true, opacity: 0.92, depthWrite: false })
     );
     logoPlane1.position.y = 0.076;
     coinGroup.add(logoPlane1);
@@ -770,23 +763,29 @@
     scene.add(orbitGroup);
 
     const orbitItems = [
-      { geo: new THREE.TorusGeometry(0.14, 0.055, 8, 16), dist: 1.55, speed: 0.7, phase: 0, tilt: 0.35 },
-      { geo: new THREE.IcosahedronGeometry(0.21, 1), dist: 1.9, speed: 0.45, phase: 1.2, tilt: -0.5 },
-      { geo: new THREE.OctahedronGeometry(0.2, 0), dist: 1.55, speed: 0.65, phase: 2.4, tilt: 0.15 },
-      { geo: new THREE.ConeGeometry(0.14, 0.35, 5, 1), dist: 1.75, speed: 0.55, phase: 3.6, tilt: -0.3 },
-      { geo: new THREE.BoxGeometry(0.22, 0.22, 0.22), dist: 2.05, speed: 0.35, phase: 4.8, tilt: 0.6 },
-      { geo: new THREE.SphereGeometry(0.16, 16, 16), dist: 1.65, speed: 0.6, phase: 5.9, tilt: -0.45 },
+      /* Ring — K-Arena / community loop */
+      { geo: new THREE.TorusGeometry(0.16, 0.04, 8, 24), dist: 1.55, speed: 0.7, phase: 0, label: 'ring' },
+      /* Diamond — crypto value, gem token */
+      { geo: new THREE.OctahedronGeometry(0.18, 0), dist: 1.85, speed: 0.48, phase: 1.2, label: 'diamond' },
+      /* Knot — K-pop melody, tangled energy */
+      { geo: new THREE.TorusKnotGeometry(0.12, 0.04, 48, 8), dist: 1.65, speed: 0.58, phase: 2.4, label: 'knot' },
+      /* Star — idol spotlight, 5-point */
+      { geo: (() => { const s = new THREE.Shape(); for (let j=0;j<10;j++){ const a=j*Math.PI/5-Math.PI/2; const r=j%2===0?0.2:0.09; s.lineTo(Math.cos(a)*r,Math.sin(a)*r); } s.closePath(); return new THREE.ExtrudeGeometry(s,{depth:0.07,bevelEnabled:true,bevelThickness:0.02,bevelSize:0.02}); })(), dist: 2.0, speed: 0.38, phase: 3.6, label: 'star' },
+      /* Cone — stage spotlight beam */
+      { geo: new THREE.ConeGeometry(0.12, 0.32, 6, 1), dist: 1.5, speed: 0.62, phase: 4.8, label: 'spotlight' },
+      /* Shield — trust & security */
+      { geo: (() => { const sh = new THREE.Shape(); const w=0.16,h=0.22; sh.moveTo(0,h); sh.bezierCurveTo(w,h,w,h*0.3,0,-h*0.3); sh.bezierCurveTo(-w,h*0.3,-w,h,0,h); return new THREE.ExtrudeGeometry(sh,{depth:0.06,bevelEnabled:true,bevelThickness:0.015,bevelSize:0.015}); })(), dist: 1.75, speed: 0.52, phase: 5.9, label: 'shield' },
     ];
 
     orbitItems.forEach((item, i) => {
+      const colors = [0x20E6E6, 0x228F96, 0xFF4054, 0x52BCB9, 0x21FFF4, 0x20E6E6];
+      const emissives = [0x20E6E6, 0x228F96, 0xFF4054, 0x52BCB9, 0x21FFF4, 0x20E6E6];
       const mat = new THREE.MeshStandardMaterial({
-        color: i % 3 === 0 ? 0x20E6E6 : (i % 3 === 1 ? 0x228F96 : 0x52BCB9),
-        metalness: 0.35, roughness: 0.45,
-        emissive: i % 3 === 0 ? 0x20E6E6 : (i % 3 === 1 ? 0x228F96 : 0x52BCB9),
-        emissiveIntensity: 0.35
+        color: colors[i], metalness: 0.4, roughness: 0.35,
+        emissive: emissives[i], emissiveIntensity: 0.35
       });
       const mesh = new THREE.Mesh(item.geo, mat);
-      mesh.userData = { dist: item.dist, speed: item.speed, phase: item.phase, tilt: item.tilt };
+      mesh.userData = { dist: item.dist, speed: item.speed, phase: item.phase, label: item.label, baseColor: colors[i], baseEmissive: emissives[i] };
       orbitGroup.add(mesh);
     });
 
