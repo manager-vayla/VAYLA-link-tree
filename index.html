@@ -213,12 +213,49 @@
       border-top: 1px solid var(--line);
       border-bottom: 1px solid var(--line);
       overflow: hidden;
+      transition: box-shadow 1.2s ease;
       background:
         radial-gradient(ellipse at 50% 120%, rgba(32,230,230,0.18), transparent 55%),
         linear-gradient(180deg, rgba(32,230,230,0.04), transparent 35%, transparent 65%, rgba(255,64,84,0.05));
     }
     .divider3d canvas { width: 100%; height: 100%; display: block; cursor: grab; }
     .divider3d canvas:active { cursor: grabbing; }
+    .divider3d::before,
+    .divider3d::after,
+    .divider3d .beam-top,
+    .divider3d .beam-bottom {
+      content: ''; position: absolute; pointer-events: none; z-index: 0;
+      opacity: 0; transition: opacity 0.7s ease;
+    }
+    .divider3d::before {
+      top: 0; left: 0; right: 0; height: 50%;
+      background: radial-gradient(ellipse at 20% 0%, rgba(32,230,230,0.25) 0%, transparent 60%),
+                  radial-gradient(ellipse at 80% 0%, rgba(32,230,230,0.2) 0%, transparent 55%);
+    }
+    .divider3d::after {
+      bottom: 0; left: 0; right: 0; height: 50%;
+      background: radial-gradient(ellipse at 25% 100%, rgba(255,64,84,0.22) 0%, transparent 60%),
+                  radial-gradient(ellipse at 75% 100%, rgba(82,188,185,0.2) 0%, transparent 55%);
+    }
+    .divider3d .beam-top {
+      top: 0; left: 0; width: 50%; height: 100%;
+      background: radial-gradient(circle at 0% 30%, rgba(32,230,230,0.28) 0%, transparent 55%);
+    }
+    .divider3d .beam-bottom {
+      bottom: 0; right: 0; width: 50%; height: 100%;
+      background: radial-gradient(circle at 100% 70%, rgba(255,64,84,0.22) 0%, transparent 55%);
+    }
+    .divider3d.glow-active::before,
+    .divider3d.glow-active::after,
+    .divider3d.glow-active .beam-top,
+    .divider3d.glow-active .beam-bottom {
+      opacity: 1;
+    }
+    .divider3d.glow-active {
+      box-shadow:
+        inset 0 0 80px rgba(32,230,230,0.12),
+        inset 0 0 30px rgba(32,230,230,0.04);
+    }
     @media (max-width: 600px) { .divider3d { height: 150px; } }
 
     /* ═══ CARDS ═══ */
@@ -379,7 +416,12 @@
     /* Re-show LinkedIn as normal card on mobile (after Community section) */
   </style>
   <script type="importmap">
-    { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
   </script>
 </head>
 <body>
@@ -499,6 +541,8 @@
   </div>
 
   <div class="divider3d" id="divider3d-1" aria-hidden="true">
+    <div class="beam-top"></div>
+    <div class="beam-bottom"></div>
     <canvas id="d3d-canvas-1"></canvas>
   </div>
 
@@ -621,7 +665,7 @@
     });
   }, { passive: true });
 
-  /* ═══ 3D DIVIDER: VAYLA Token Coin + Orbiting Concepts ═══ */
+  /* ═══ 3D DIVIDER: VAYLA Token Coin ═══ */
   (async function init3D() {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     try {
@@ -635,325 +679,202 @@
     if (!cvs) return;
     const container = cvs.parentElement;
     const scene = new THREE.Scene();
+
     const renderer = new THREE.WebGLRenderer({ canvas: cvs, alpha: true, antialias: true });
     let DW = container.clientWidth, DH = container.clientHeight;
     renderer.setSize(DW, DH, false);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-    const camera = new THREE.PerspectiveCamera(42, DW/Math.max(DH,1), 0.1, 100);
-    camera.position.set(0, 0.15, 6.5);
+    const camera = new THREE.PerspectiveCamera(40, DW / Math.max(DH, 1), 0.1, 100);
+    camera.position.set(0, 0.2, 7.5);
+    camera.lookAt(0, 0, 0);
 
-    /* ── Lighting tuned for a stage coin ── */
-    const ambient = new THREE.AmbientLight(0x223344, 0.35);
-    scene.add(ambient);
-    const keyLight = new THREE.DirectionalLight(0x20E6E6, 1.2);
-    keyLight.position.set(3, 3, 5); scene.add(keyLight);
-    const rimLight = new THREE.DirectionalLight(0xFF4054, 0.5);
-    rimLight.position.set(-4, -1.5, 3); scene.add(rimLight);
-    const fillLight = new THREE.DirectionalLight(0x52BCB9, 0.4);
-    fillLight.position.set(0, -3, 2); scene.add(fillLight);
-    /* Spotlight following the coin — concert key light */
-    const spotLight = new THREE.SpotLight(0xffffff, 1.5, 12, Math.PI/6, 0.4, 1.2);
-    spotLight.position.set(0, 5, 4);
-    scene.add(spotLight);
-    scene.add(spotLight.target);
+    scene.add(new THREE.AmbientLight(0x303050, 0.7));
+    const key = new THREE.DirectionalLight(0xffeedd, 0.9);
+    key.position.set(3, 4, 5); scene.add(key);
+    const fill = new THREE.DirectionalLight(0x20E6E6, 0.3);
+    fill.position.set(-3, 1, -4); scene.add(fill);
 
-    /* ═══ VAYLA TOKEN COIN (material-array pattern: side=rim, index-1&2=caps) ═══ */
+    /* ═══ 4 CORNER SPOTLIGHTS — light from container edge angles ═══ 
+       Each PointLight shoots from a corner toward the coin, colored
+       like concert stage rigging. */
+    const cornerLights = [
+      { color: 0x20E6E6, pos: [-3.5,  2.5, 4.0], intensity: 2.5 }, /* top-left cyan */
+      { color: 0xFF4054, pos: [ 3.5,  2.5, 4.0], intensity: 2.0 }, /* top-right red  */
+      { color: 0x52BCB9, pos: [-3.5, -2.5, 4.0], intensity: 2.2 }, /* bot-left teal  */
+      { color: 0x21FFF4, pos: [ 3.5, -2.5, 4.0], intensity: 2.8 }, /* bot-right bright cyan */
+    ];
+    const corners = cornerLights.map(cfg => {
+      const l = new THREE.PointLight(cfg.color, cfg.intensity, 8);
+      l.position.set(...cfg.pos);
+      scene.add(l);
+      return l;
+    });
+
+    /* ═══ VAYLA TOKEN COIN ═══
+       Edge = open-ended CylinderGeometry rotated so its axis lies along Z.
+       Faces = CircleGeometry discs at the front (+Z) and back (-Z).
+       Group has no base tilt so the roving rx/rz stays small. */
     const coinGroup = new THREE.Group();
     scene.add(coinGroup);
 
-    const COIN_R = 0.92, COIN_H = 0.16;
-    const coinGeo = new THREE.CylinderGeometry(COIN_R, COIN_R, COIN_H, 80);
+    const COIN_R = 0.95, COIN_H = 0.18, SEGS = 96;
 
     /* Side material — metallic cyan rim */
-    const sideMat = new THREE.MeshStandardMaterial({
-      color: 0x1a6e6e, metalness: 0.85, roughness: 0.22,
-      emissive: 0x0a2a2a, emissiveIntensity: 0.5
+    const edgeMat = new THREE.MeshStandardMaterial({
+      color: 0x1a6e6e, metalness: 0.92, roughness: 0.14,
+      emissive: 0x0a2f2f, emissiveIntensity: 0.6
     });
 
-    /* Cap materials start dark (texture maps in on load callback) */
-    const capMatBase = () => new THREE.MeshStandardMaterial({
-      map: null, color: 0x0d3d3d, metalness: 0.2, roughness: 0.55,
-      emissive: 0x050505, emissiveIntensity: 0.3
-    });
-    const capMat = capMatBase();
-    const capMatBack = capMatBase();
+    /* Cap materials — MeshBasicMaterial = unlit, full brightness, logo visible */
+    const capMatF = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const capMatB = new THREE.MeshBasicMaterial({ color: 0xffffff });
 
-    const coin = new THREE.Mesh(coinGeo, [sideMat, capMat, capMatBack]);
-    coin.rotation.x = Math.PI * 0.5;
-    coinGroup.add(coin);
+    /* Open-ended cylinder for the rim — rotate so axis lies along Z */
+    const edgeGeo = new THREE.CylinderGeometry(COIN_R, COIN_R, COIN_H, SEGS, 1, true);
+    const rim = new THREE.Mesh(edgeGeo, edgeMat);
+    rim.rotation.x = Math.PI * 0.5;
+    coinGroup.add(rim);
 
-    /* Load logo texture onto both caps on ready */
-    const textureLoader = new THREE.TextureLoader();
-    textureLoader.load(
-      'logo.jpg',
+    /* CircleGeometry faces — default is in XY plane facing +Z.
+       Place front face at +Z, back face at -Z (rotated to face -Z). */
+    const faceGeo = new THREE.CircleGeometry(COIN_R, SEGS);
+
+    const frontFace = new THREE.Mesh(faceGeo, capMatF);
+    frontFace.position.z = COIN_H / 2;
+    coinGroup.add(frontFace);
+
+    const backFace = new THREE.Mesh(faceGeo.clone(), capMatB);
+    backFace.position.z = -COIN_H / 2;
+    backFace.rotation.y = Math.PI;
+    coinGroup.add(backFace);
+
+    /* Load logo onto both cap materials */
+    const texLoader = new THREE.TextureLoader();
+    texLoader.load('logo.jpg',
       (tex) => {
         tex.colorSpace = THREE.SRGBColorSpace;
         tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-        tex.center.set(0.5, 0.5);
-        /* Back-cap clone so each cap owns its texture ref */
-        const texBack = tex.clone();
-        texBack.needsUpdate = true;
-        capMat.map = tex;
-        capMatBack.map = texBack;
-        capMat.color.set(0x0f3f3f);
-        capMatBack.color.set(0x0f3f3f);
-        capMat.needsUpdate = true;
-        capMatBack.needsUpdate = true;
+        const tex2 = tex.clone(); tex2.needsUpdate = true;
+        tex2.center.set(0.5, 0.5);
+        capMatF.map = tex;
+        capMatB.map = tex2;
+        capMatF.needsUpdate = true;
+        capMatB.needsUpdate = true;
       },
       undefined,
-      (err) => {
-        capMat.emissive.set(0x20E6E6);
-        capMatBack.emissive.set(0x20E6E6);
-        capMat.emissiveIntensity = 0.5;
-        capMatBack.emissiveIntensity = 0.5;
-        capMat.needsUpdate = true;
-        capMatBack.needsUpdate = true;
+      () => {
+        capMatF.color.set(0x20E6E6);
+        capMatB.color.set(0x20E6E6);
+        capMatF.needsUpdate = true;
+        capMatB.needsUpdate = true;
       }
     );
 
-    /* Thick edge ring (coin rim detail) */
-    const ringGeo = new THREE.TorusGeometry(COIN_R + 0.02, 0.05, 20, 80);
+    /* Edge glow ring */
+    const ringGeo = new THREE.TorusGeometry(COIN_R + 0.02, 0.04, 20, 100);
     const ringMat = new THREE.MeshStandardMaterial({
-      color: 0x20E6E6, metalness: 0.95, roughness: 0.08,
+      color: 0x20E6E6, metalness: 0.95, roughness: 0.06,
       emissive: 0x20E6E6, emissiveIntensity: 0.7
     });
-    const ring = new THREE.Mesh(ringGeo, ringMat);
-    ring.rotation.x = Math.PI * 0.5;
-    coinGroup.add(ring);
+    const edgeRing = new THREE.Mesh(ringGeo, ringMat);
+    coinGroup.add(edgeRing);
 
-    /* Secondary thin accent ring just inside the rim */
-    const innerRingGeo = new THREE.TorusGeometry(COIN_R - 0.09, 0.02, 12, 64);
-    const innerRingMat = new THREE.MeshStandardMaterial({
-      color: 0x21FFF4, metalness: 0.9, roughness: 0.15,
-      emissive: 0x21FFF4, emissiveIntensity: 0.5
-    });
-    const innerRing = new THREE.Mesh(innerRingGeo, innerRingMat);
-    innerRing.rotation.x = Math.PI * 0.5;
-    coinGroup.add(innerRing);
+    /* ═══ INTERACTION ═══ */
+    let flip = null;
 
-    /* ═══ CONCERT STAGE DECOR ═══ */
-    /* Sweeping spotlight beams (volumetric cones) */
-    const beamGroup = new THREE.Group();
-    scene.add(beamGroup);
-    const beamMat = new THREE.MeshBasicMaterial({
-      transparent: true, opacity: 0.10, side: THREE.DoubleSide,
-      depthWrite: false, blending: THREE.AdditiveBlending
-    });
-    const beamColors = [0x20E6E6, 0xFF4054, 0x52BCB9, 0x21FFF4];
-    const beams = [];
-    for (let i = 0; i < 4; i++) {
-      const beamGeo = new THREE.ConeGeometry(1.6, 5.5, 24, 1, true);
-      const mat = beamMat.clone();
-      mat.color.setHex(beamColors[i]);
-      const beam = new THREE.Mesh(beamGeo, mat);
-      beam.position.set(Math.cos(i * Math.PI/2) * 2.6, 1.9, -1.2);
-      beam.rotation.z = Math.cos(i * Math.PI/2) * 0.7;
-      beam.rotation.x = Math.PI * 0.52;
-      beam.userData = { baseX: beam.position.x, phase: i * 1.6, speed: 0.4 + i * 0.12, color: beamColors[i] };
-      beams.push(beam);
-      beamGroup.add(beam);
+    function easeOutBack(x) {
+      const c1 = 1.70158, c3 = c1 + 1;
+      return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
     }
 
-    /* Laser grid — thin pulsing lines fanning out from stage floor */
-    const laserGroup = new THREE.Group();
-    scene.add(laserGroup);
-    const laserMat = new THREE.LineBasicMaterial({
-      color: 0x20E6E6, transparent: true, opacity: 0.25, blending: THREE.AdditiveBlending
-    });
-    const lasers = [];
-    for (let i = 0; i < 14; i++) {
-      const a = (i / 14) * Math.PI * 2;
-      const pts = [
-        new THREE.Vector3(0, -1.2, 0),
-        new THREE.Vector3(Math.cos(a) * 4.5, -1.2 + Math.abs(Math.sin(a)) * 2.2, Math.sin(a) * 4.5)
-      ];
-      const geo = new THREE.BufferGeometry().setFromPoints(pts);
-      const mat = laserMat.clone();
-      const line = new THREE.Line(geo, mat);
-      line.userData = { phase: i * 0.5, color: i % 2 === 0 ? 0x20E6E6 : 0xFF4054 };
-      lasers.push(line);
-      laserGroup.add(line);
-    }
-
-    /* Stage glow disc under the coin */
-    const glowGeo = new THREE.CircleGeometry(1.7, 48);
-    const glowMat = new THREE.MeshBasicMaterial({
-      color: 0x20E6E6, transparent: true, opacity: 0.18,
-      blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide
-    });
-    const glowDisc = new THREE.Mesh(glowGeo, glowMat);
-    glowDisc.rotation.x = -Math.PI * 0.5;
-    glowDisc.position.y = -1.25;
-    scene.add(glowDisc);
-
-    /* ── Orbiting Concept Objects (each on its own 3D-inclined orbit plane) ── */
-    const orbitGroup = new THREE.Group();
-    scene.add(orbitGroup);
-
-    const orbitItems = [
-      /* Ring — K-Arena / community loop */
-      { geo: new THREE.TorusGeometry(0.16, 0.04, 8, 24), dist: 1.75, speed: 0.7, phase: 0, incl: 0.35, node: 0.0, label: 'ring' },
-      /* Diamond — crypto value, gem token */
-      { geo: new THREE.OctahedronGeometry(0.18, 0), dist: 2.1, speed: 0.48, phase: 1.2, incl: -0.55, node: 1.1, label: 'diamond' },
-      /* Knot — K-pop melody, tangled energy */
-      { geo: new THREE.TorusKnotGeometry(0.12, 0.04, 48, 8), dist: 1.9, speed: 0.58, phase: 2.4, incl: 0.8, node: 2.2, label: 'knot' },
-      /* Star — idol spotlight, 5-point */
-      { geo: (() => { const s = new THREE.Shape(); for (let j=0;j<10;j++){ const a=j*Math.PI/5-Math.PI/2; const r=j%2===0?0.2:0.09; s.lineTo(Math.cos(a)*r,Math.sin(a)*r); } s.closePath(); return new THREE.ExtrudeGeometry(s,{depth:0.07,bevelEnabled:true,bevelThickness:0.02,bevelSize:0.02}); })(), dist: 2.25, speed: 0.38, phase: 3.6, incl: -0.3, node: 3.3, label: 'star' },
-      /* Cone — stage spotlight beam */
-      { geo: new THREE.ConeGeometry(0.12, 0.32, 6, 1), dist: 1.65, speed: 0.62, phase: 4.8, incl: 0.95, node: 4.4, label: 'spotlight' },
-      /* Shield — trust & security */
-      { geo: (() => { const sh = new THREE.Shape(); const w=0.16,h=0.22; sh.moveTo(0,h); sh.bezierCurveTo(w,h,w,h*0.3,0,-h*0.3); sh.bezierCurveTo(-w,h*0.3,-w,h,0,h); return new THREE.ExtrudeGeometry(sh,{depth:0.06,bevelEnabled:true,bevelThickness:0.015,bevelSize:0.015}); })(), dist: 2.0, speed: 0.52, phase: 5.9, incl: -0.7, node: 5.5, label: 'shield' },
-    ];
-
-    orbitItems.forEach((item, i) => {
-      const colors = [0x20E6E6, 0x228F96, 0xFF4054, 0x52BCB9, 0x21FFF4, 0x20E6E6];
-      const emissives = [0x20E6E6, 0x228F96, 0xFF4054, 0x52BCB9, 0x21FFF4, 0x20E6E6];
-      const mat = new THREE.MeshStandardMaterial({
-        color: colors[i], metalness: 0.4, roughness: 0.35,
-        emissive: emissives[i], emissiveIntensity: 0.35
-      });
-      const mesh = new THREE.Mesh(item.geo, mat);
-      mesh.userData = {
-        dist: item.dist, speed: item.speed, phase: item.phase,
-        incl: item.incl, node: item.node, label: item.label,
-        baseColor: colors[i], baseEmissive: emissives[i]
+    function triggerFlip() {
+      if (flip) return;
+      flip = {
+        t0: performance.now(), dur: 900,
+        fromY: coinGroup.rotation.y % (Math.PI * 2),
+        toY: (coinGroup.rotation.y % (Math.PI * 2)) + Math.PI
       };
-      orbitGroup.add(mesh);
-    });
-
-    /* ── Crowd-energy particle cloud (denser, multicolor) ── */
-    const particlesGeo = new THREE.BufferGeometry();
-    const pCount = 320;
-    const pPositions = new Float32Array(pCount * 3);
-    const pColors = new Float32Array(pCount * 3);
-    const pPalette = [
-      [0.13, 0.9, 0.9],   /* cyan */
-      [0.32, 0.56, 0.6],  /* teal */
-      [1.0, 0.25, 0.33],  /* red */
-      [0.32, 0.74, 0.73], /* teal-light */
-      [0.13, 1.0, 0.96]   /* cyan-bright */
-    ];
-    for (let i = 0; i < pCount; i++) {
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-      const r = 1.4 + Math.random() * 2.8;
-      pPositions[i*3]   = r * Math.sin(phi) * Math.cos(theta);
-      pPositions[i*3+1] = r * Math.cos(phi) * 0.7;
-      pPositions[i*3+2] = r * Math.sin(phi) * Math.sin(theta);
-      const c = pPalette[Math.floor(Math.random() * pPalette.length)];
-      pColors[i*3] = c[0]; pColors[i*3+1] = c[1]; pColors[i*3+2] = c[2];
+      container.classList.add('glow-active');
+      setTimeout(() => container.classList.remove('glow-active'), 1300);
     }
-    particlesGeo.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
-    particlesGeo.setAttribute('color', new THREE.BufferAttribute(pColors, 3));
-    const particlesMat = new THREE.PointsMaterial({
-      size: 0.045, transparent: true, opacity: 0.6, vertexColors: true,
-      blending: THREE.AdditiveBlending, depthWrite: false
-    });
-    const particles = new THREE.Points(particlesGeo, particlesMat);
-    scene.add(particles);
 
-    /* ── Interaction ── */
-    let targetRotY = 0, currentRotY = 0;
-    let targetRotX = 0.25, currentRotX = 0.25;
-    let isDragging = false, prevX = 0, prevY = 0;
+    cvs.addEventListener('pointerdown', () => { triggerFlip(); });
+    container.addEventListener('touchstart', () => triggerFlip(), { passive: true });
 
-    cvs.addEventListener('pointerdown', e => { isDragging = true; prevX = e.clientX; prevY = e.clientY; cvs.style.cursor = 'grabbing'; });
-    window.addEventListener('pointerup', () => { isDragging = false; cvs.style.cursor = 'grab'; });
-    window.addEventListener('pointermove', e => {
-      if (!isDragging) return;
-      targetRotY += (e.clientX - prevX) * 0.008;
-      targetRotX += (e.clientY - prevY) * 0.006;
-      targetRotX = Math.max(-0.8, Math.min(1.2, targetRotX));
-      prevX = e.clientX; prevY = e.clientY;
-    });
+    const sectRect = () => container.getBoundingClientRect();
 
-    const sectionRect = () => container.getBoundingClientRect();
+    /* ── Perlin-like noise seeds for random roving rotation ── */
+    let nPhase = 0;
 
     function tick(t) {
       requestAnimationFrame(tick);
       DW = container.clientWidth; DH = container.clientHeight;
       renderer.setSize(DW, DH, false);
-      camera.aspect = DW/Math.max(DH,1); camera.updateProjectionMatrix();
+      camera.aspect = DW / Math.max(DH, 1);
+      camera.updateProjectionMatrix();
 
-      const srect = sectionRect();
-      const scenter = srect.top + srect.height/2;
-      const vy = window.innerHeight/2;
-      const dist = Math.abs(scenter - vy);
-      const snap = Math.max(0, Math.min((vy*0.8 - dist)/(vy*0.8), 1));
-      const bounce = 1 - snap;
+      const sr = sectRect();
+      const cy = sr.top + sr.height / 2;
+      const vy2 = window.innerHeight / 2;
+      const d = Math.abs(cy - vy2);
+      const snap = Math.max(0, Math.min((vy2 * 0.75 - d) / (vy2 * 0.75), 1));
       const tt = t * 0.001;
 
-      /* Concert "beat" pulse — drives coin + decor breathing */
+      /* ── Roving rotation: coin slowly tilts on all 3 axes using
+         sinusoidal drift with separate frequencies, then snaps
+         back toward resting tilt. Coin stays at same position. ── */
+      nPhase += 0.00025;
+
+      const rx = Math.sin(tt * 0.23 + nPhase * 1.7) * 0.06
+               + Math.sin(tt * 0.41 + 2.1) * 0.04;
+      const ry = Math.sin(tt * 0.17 + nPhase * 0.8) * 0.5
+               + Math.cos(tt * 0.31 + 1.3) * 0.3;
+      const rz = Math.cos(tt * 0.29 + nPhase * 1.3) * 0.1
+               + Math.sin(tt * 0.53 + 3.7) * 0.06;
+
       const beat = (Math.sin(tt * 2.2) * 0.5 + 0.5);
 
-      if (!isDragging) {
-        targetRotY += (0 - targetRotY) * 0.03;
-        targetRotX += (0.25 - targetRotX) * 0.03;
+      if (flip) {
+        const pr = Math.min((t - flip.t0) / flip.dur, 1);
+        coinGroup.rotation.y = flip.fromY + (flip.toY - flip.fromY) * easeOutBack(pr);
+        const sc = 1 + Math.sin(pr * Math.PI) * 0.28;
+        coinGroup.scale.setScalar(sc);
+        edgeRing.material.emissiveIntensity = 0.7 + Math.sin(pr * Math.PI) * 0.8;
+        if (pr >= 1) {
+          coinGroup.rotation.y = flip.toY;
+          coinGroup.scale.setScalar(1);
+          flip = null;
+        }
+      } else {
+        coinGroup.rotation.y += 0.015 + snap * 0.03 + Math.sin(tt * 0.17 + nPhase) * 0.008;
+        coinGroup.rotation.x += (rx - coinGroup.rotation.x) * 0.06;
+        coinGroup.rotation.z += (rz - coinGroup.rotation.z) * 0.06;
+        coinGroup.scale.lerp(
+          new THREE.Vector3(1 + snap * 0.08 + beat * 0.03, 1 + snap * 0.08 + beat * 0.03, 1 + snap * 0.08 + beat * 0.03),
+          0.06
+        );
       }
-      currentRotY += (targetRotY - currentRotY) * 0.08;
-      currentRotX += (targetRotX - currentRotX) * 0.08;
 
-      /* Coin flip on Y to show both VAYLA faces */
-      coinGroup.rotation.y += 0.005 + snap * 0.035;
-      coinGroup.rotation.x = currentRotX;
-      coin.material[0].emissiveIntensity = 0.5 + snap * 0.6 + beat * 0.25;
-      ring.material.emissiveIntensity = 0.7 + snap * 0.5 + beat * 0.3;
-      innerRing.material.emissiveIntensity = 0.5 + snap * 0.4 + beat * 0.35;
-      const pulseScale = 1 + snap * 0.12 + beat * 0.04;
-      coin.scale.setScalar(pulseScale);
-      ring.scale.setScalar(pulseScale);
-      innerRing.scale.setScalar(pulseScale);
+      if (!flip) {
+        edgeMat.emissiveIntensity = 0.6 + snap * 0.3 + beat * 0.12;
+        edgeRing.material.emissiveIntensity = 0.7 + snap * 0.25 + beat * 0.18;
+      }
 
-      /* SpotLight tracks the coin */
-      spotLight.target.position.copy(coinGroup.position);
-
-      /* Sweeping spotlight beams */
-      beams.forEach((b) => {
-        const ud = b.userData;
-        b.position.x = ud.baseX + Math.sin(tt * ud.speed + ud.phase) * 1.4;
-        b.rotation.z = Math.sin(tt * ud.speed + ud.phase) * 0.5;
-        b.material.opacity = 0.08 + snap * 0.06 + beat * 0.04;
+      /* ── Corner spotlights pulse with beat ── */
+      corners.forEach((l, i) => {
+        l.intensity = cornerLights[i].intensity * (0.6 + snap * 0.4 + Math.sin(tt * 1.5 + i * 1.2 + beat) * 0.15);
       });
-
-      /* Laser grid pulse */
-      lasers.forEach((l) => {
-        l.material.opacity = 0.18 + snap * 0.15 + Math.sin(tt * 3 + l.userData.phase) * 0.08;
-      });
-      laserGroup.rotation.y = tt * 0.1;
-
-      /* Stage glow disc */
-      glowDisc.material.opacity = 0.15 + snap * 0.12 + beat * 0.06;
-      glowDisc.scale.setScalar(1 + beat * 0.08);
-
-      /* Orbiting objects on 3D-inclined planes */
-      orbitGroup.children.forEach((m, i) => {
-        const ud = m.userData;
-        const angle = tt * ud.speed + ud.phase;
-        const bx = Math.cos(angle) * ud.dist;
-        const by = 0;
-        const bz = Math.sin(angle) * ud.dist;
-        const ty = by * Math.cos(ud.incl) - bz * Math.sin(ud.incl);
-        const tz = by * Math.sin(ud.incl) + bz * Math.cos(ud.incl);
-        const nx = bx * Math.cos(ud.node) - tz * Math.sin(ud.node);
-        const nz = bx * Math.sin(ud.node) + tz * Math.cos(ud.node);
-        m.position.set(nx + bounce * 0.4 * Math.sin(tt+i), ty + bounce * 0.3 * Math.cos(tt+i), nz);
-        m.rotation.x += 0.01 + snap * 0.02;
-        m.rotation.y += 0.015 + snap * 0.025;
-        m.material.emissiveIntensity = 0.35 + snap * 0.5 + beat * 0.15;
-        m.scale.setScalar(1 + snap * 0.18 + beat * 0.05);
-      });
-
-      orbitGroup.rotation.y = currentRotY;
-      particles.rotation.y = currentRotY * 0.4;
-      particles.rotation.x = currentRotX * 0.3;
-      particles.material.opacity = 0.5 + snap * 0.3 + beat * 0.1;
 
       renderer.render(scene, camera);
     }
     tick(0);
 
-    new ResizeObserver(() => { DW = container.clientWidth; DH = container.clientHeight; renderer.setSize(DW, DH, false); }).observe(container);
+    new ResizeObserver(() => {
+      DW = container.clientWidth; DH = container.clientHeight;
+      renderer.setSize(DW, DH, false);
+    }).observe(container);
   }
 })();
 </script>

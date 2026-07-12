@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VAYLA Token Coin · 3D Preview</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #050606; overflow: hidden; }
+    canvas { display: block; }
+    .label {
+      position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
+      font-family: 'Geist Mono', monospace; font-size: 0.7rem; letter-spacing: 0.15em;
+      color: rgba(240,240,236,0.5); text-transform: uppercase; z-index: 10;
+    }
+  </style>
+  <script type="importmap">
+    { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+  </script>
+</head>
+<body>
+  <div class="label">VAYLA · 3D Token Coin · Click to flip</div>
+  <script type="module">
+    import * as THREE from 'three';
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.3;
+    document.body.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+    camera.position.set(0, 0.8, 8);
+    camera.lookAt(0, 0, 0);
+
+    scene.add(new THREE.AmbientLight(0x1a2a3a, 0.45));
+    const key = new THREE.DirectionalLight(0x20E6E6, 1.5);
+    key.position.set(3, 3, 5); scene.add(key);
+    const rim = new THREE.DirectionalLight(0xFF4054, 0.6);
+    rim.position.set(-4, -1.5, 3); scene.add(rim);
+    const fill = new THREE.DirectionalLight(0x52BCB9, 0.5);
+    fill.position.set(0, -3, 2); scene.add(fill);
+    const under = new THREE.PointLight(0x20E6E6, 1.2, 4);
+    under.position.set(0, -1.5, 0); scene.add(under);
+
+    const coinGroup = new THREE.Group();
+    scene.add(coinGroup);
+
+    const COIN_R = 0.92, COIN_H = 0.28, BEVEL = 0.06;
+    const halfH = COIN_H * 0.5;
+
+    const profile = new THREE.Shape();
+    profile.moveTo(0, -halfH);
+    profile.lineTo(COIN_R, -halfH);
+    profile.quadraticCurveTo(COIN_R + BEVEL, -halfH, COIN_R + BEVEL, -halfH + BEVEL);
+    profile.lineTo(COIN_R + BEVEL, halfH - BEVEL);
+    profile.quadraticCurveTo(COIN_R + BEVEL, halfH, COIN_R, halfH);
+    profile.lineTo(0, halfH);
+
+    const coinGeo = new THREE.LatheGeometry(profile.getPoints(80), 80);
+    coinGeo.center();
+
+    const sideMat = new THREE.MeshStandardMaterial({
+      color: 0x1a7070, metalness: 0.9, roughness: 0.18,
+      emissive: 0x082828, emissiveIntensity: 0.55
+    });
+    const coin = new THREE.Mesh(coinGeo, sideMat);
+    coinGroup.add(coin);
+
+    const capGeo = new THREE.CylinderGeometry(COIN_R, COIN_R, 0.01, 80);
+    const capMatFront = new THREE.MeshStandardMaterial({
+      map: null, color: 0x0a2a2a, metalness: 0.25, roughness: 0.45,
+      emissive: 0x040808, emissiveIntensity: 0.4
+    });
+    const capMatBack = capMatFront.clone();
+    const frontCap = new THREE.Mesh(capGeo, capMatFront);
+    frontCap.position.y = halfH - 0.02;
+    const backCap = new THREE.Mesh(capGeo.clone(), capMatBack);
+    backCap.position.y = -halfH + 0.02;
+    coinGroup.add(frontCap, backCap);
+
+    const loader = new THREE.TextureLoader();
+    loader.load('../logo.jpg', (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      tex.center.set(0.5, 0.5);
+      const texBack = tex.clone(); texBack.needsUpdate = true;
+      capMatFront.map = tex;
+      capMatBack.map = texBack;
+      capMatFront.color.set(0x0e3e3e);
+      capMatBack.color.set(0x0e3e3e);
+      capMatFront.needsUpdate = true;
+      capMatBack.needsUpdate = true;
+    }, undefined, () => {
+      capMatFront.emissive.set(0x20E6E6); capMatFront.emissiveIntensity = 0.55;
+      capMatBack.emissive.set(0x20E6E6); capMatBack.emissiveIntensity = 0.55;
+      capMatFront.needsUpdate = true; capMatBack.needsUpdate = true;
+    });
+
+    const ringGeo = new THREE.TorusGeometry(COIN_R + BEVEL + 0.02, 0.045, 24, 100);
+    const ringMat = new THREE.MeshStandardMaterial({
+      color: 0x20E6E6, metalness: 0.98, roughness: 0.06,
+      emissive: 0x20E6E6, emissiveIntensity: 0.8
+    });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    coinGroup.add(ring);
+
+    const innerRingGeo = new THREE.TorusGeometry(COIN_R - 0.07, 0.018, 16, 80);
+    const innerRingMat = new THREE.MeshStandardMaterial({
+      color: 0x21FFF4, metalness: 0.95, roughness: 0.1,
+      emissive: 0x21FFF4, emissiveIntensity: 0.6
+    });
+    const innerRing = new THREE.Mesh(innerRingGeo, innerRingMat);
+    coinGroup.add(innerRing);
+
+    coinGroup.rotation.x = 0.3;
+
+    let flipAnim = null;
+    renderer.domElement.addEventListener('click', () => {
+      if (flipAnim) return;
+      flipAnim = { start: performance.now(), duration: 800, fromY: coinGroup.rotation.y, toY: coinGroup.rotation.y + Math.PI, fromScale: 1, toScale: 1.25 };
+    });
+
+    function easeOutBack(t) { const c1 = 1.70158; const c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); }
+
+    function resize() {
+      const size = Math.min(window.innerWidth, window.innerHeight) * 0.85;
+      renderer.setSize(size, size, false);
+      camera.aspect = 1;
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    function animate(t) {
+      requestAnimationFrame(animate);
+      const tt = t * 0.001;
+
+      if (flipAnim) {
+        const elapsed = t - flipAnim.start;
+        const progress = Math.min(elapsed / flipAnim.duration, 1);
+        const eased = easeOutBack(progress);
+        coinGroup.rotation.y = flipAnim.fromY + (flipAnim.toY - flipAnim.fromY) * eased;
+        const sc = flipAnim.fromScale + (flipAnim.toScale - flipAnim.fromScale) * Math.sin(progress * Math.PI);
+        coinGroup.scale.setScalar(sc);
+        ring.scale.setScalar(sc);
+        innerRing.scale.setScalar(sc);
+        under.intensity = 1.2 + Math.sin(progress * Math.PI) * 2;
+        ring.material.emissiveIntensity = 0.8 + Math.sin(progress * Math.PI) * 0.6;
+        innerRing.material.emissiveIntensity = 0.6 + Math.sin(progress * Math.PI) * 0.5;
+        if (progress >= 1) {
+          coinGroup.rotation.y = flipAnim.toY;
+          coinGroup.scale.setScalar(1);
+          ring.scale.setScalar(1);
+          innerRing.scale.setScalar(1);
+          under.intensity = 1.2;
+          ring.material.emissiveIntensity = 0.8;
+          innerRing.material.emissiveIntensity = 0.6;
+          flipAnim = null;
+        }
+      } else {
+        coinGroup.rotation.y += 0.008;
+        coinGroup.scale.lerp(new THREE.Vector3(1, 1, 1), 0.05);
+        ring.scale.lerp(new THREE.Vector3(1, 1, 1), 0.05);
+        innerRing.scale.lerp(new THREE.Vector3(1, 1, 1), 0.05);
+      }
+
+      under.intensity += (1.2 + Math.sin(tt * 2.2) * 0.4 - under.intensity) * 0.1;
+      ring.material.emissiveIntensity += (0.8 + Math.sin(tt * 2.2) * 0.15 - ring.material.emissiveIntensity) * 0.1;
+      innerRing.material.emissiveIntensity += (0.6 + Math.sin(tt * 2.2) * 0.12 - innerRing.material.emissiveIntensity) * 0.1;
+
+      renderer.render(scene, camera);
+    }
+    animate(0);
+  </script>
+</body>
+</html>
