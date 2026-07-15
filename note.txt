@@ -1,0 +1,7 @@
+1. Một số nguồn tài nguyên thiết kế web mã nguồn mở trên Github: https://github.com/stars/binhpt310/lists/web-ui-design
+
+2. Link một số website có design + animation đẹp: meter.com, emons.de, mosey.com
+
+3. Các bảng xếp hạng web có design đẹp nhất trên internet: www.awwwards.com, www.cssdesignawards.com, dribbble.com
+
+4. Ứng dụng trực quan hóa giao diện trang web ở các thiết bị khác nhau: https://responsively.app/download
